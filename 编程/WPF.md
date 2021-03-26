@@ -1,5 +1,28 @@
 ## WPF
 
+### xmlns:x
+
+Keys：x:Array
+
+```xaml
+<x:Array x:Key="Legends" Type="{x:Type model:LegendModel}">
+    <model:LegendModel
+                       Name="30°"
+                       IsChecked="False"
+                       LegendBrush="Blue" />
+    <model:LegendModel
+                       Name="50°"
+                       IsChecked="False"
+                       LegendBrush="Green" />
+    <model:LegendModel
+                       Name="120°"
+                       IsChecked="True"
+                       LegendBrush="Red" />
+</x:Array>
+```
+
+
+
 
 
 ### MVVM Foundation
@@ -23,7 +46,7 @@ Bind Mode
 
  Default(Two Way):    UI <---> Model (UI Get & Set)
 
-### Trigger
+### Triggers
 
 - Keys：Property Trigger、Binding DataTrigger、ControlTemplate.Triggers、MultiDataTrigger、EventTrigger(RouteEvent、Actions、Storyboard)、EventSetter
 
@@ -152,44 +175,130 @@ Bind Mode
 	<EventSetter Event="LostFocus" Handler="ListBoxItem_LostFocus"/>
 	~~~
 
+#### 属性触发器 (Trigger/MultiTrigger)
+
+http://www.bubuko.com/infodetail-2501160.html
+
+#### 数据触发器 (DataTrigger/MultiDataTrigger)
+
+
+
+#### 事件触发器 (EventTrigger)
+
+
+
+### VisualStateManager
+
+> 1. VisualState: 视图状态(Visual States)表示控件在一个特殊的逻辑状态下的样式、外观；
+> 2. VisualStateGroup: 状态组由相互排斥的状态组成，状态组与状态组并不互斥；
+> 3. VisualTransition: 视图转变 (Visual Transitions) 代表控件从一个视图状态向另一个状态转换时的过渡；
+> 4. VisualStateManager: 由它负责在代码中来切换到不同的状态；
+
+<img src="Images\visual_state_manager.PNG" style="zoom: 67%;" />
+
+
+
+### Animation
+
+Keys：BeginStoryboard、Storyboard、DoubleAnimation、Storyboard.TargetName、Storyboard.TargetProperty、Duration、To
+
+```xaml
+// RadioButton --> RoutEvent:Check、UnCheck --> EventTrigger --> BeginStoryboard --> Storyboard --> DoubleAnimation --> Border
+
+<Storyboard x:Key="UserInfoStoryboard">
+	<DoubleAnimation Duration="0:0:0.2" To="0"
+					 Storyboard.TargetName="tt"
+					 Storyboard.TargetProperty="X"/>
+</Storyboard>
+
+<Storyboard x:Key="CloseUserInfoStoryboard">
+	<DoubleAnimation Duration="0:0:0.1"
+					 Storyboard.TargetName="tt"
+					 Storyboard.TargetProperty="X"/>
+</Storyboard>
+
+<Window.Triggers>
+	<EventTrigger RoutedEvent="Button.Click" SourceName="btnUsreInfo">
+		<BeginStoryboard Storyboard="{StaticResource UserInfoStoryboard}"/>
+	</EventTrigger>
+	<EventTrigger RoutedEvent="Button.Click" SourceName="btnCloseUserInfo">
+		<BeginStoryboard Storyboard="{StaticResource CloseUserInfoStoryboard}"/>
+	</EventTrigger>
+</Window.Triggers>
+
+<RadioButton x:Name="usrRadBtn" />
+<Border>
+	<Border.RenderTransform>
+		<TranslateTransform X="250" x:Name="tt"/>
+	</Border.RenderTransform>
+</Border>
+```
+
+
+
 ### Command
 
- - Keys：Command、CommandParameter、EventTrigger、CallMethodAction、InvokeCommandAction
+Keys：Command、CommandParameter、EventTrigger、CallMethodAction、InvokeCommandAction
 
-	~~~xaml
-	1.通过 事件 
-	<Button Click="Button_Click"></Button>
-	2.通过 命令
-	<Button Command="{Binding Path=DataContext.OprateDataGridRow, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}}}"
-			CommandParameter="{Binding RelativeSource={x:Static RelativeSource.Self}}">
-	</Button>	//  RelativeSource.Self     Button 自身作为参数
-	3.通过 事件触发器 
-	xmlns:Interaction="http://schemas.microsoft.com/expression/2010/interactions"
-	xmlns:Interactivity="http://schemas.microsoft.com/expression/2010/interactivity"
-	<Button>
-		<Interactivity:Interaction.Triggers>
-			<Interactivity:EventTrigger EventName="Click">
-				<Interaction:CallMethodAction TargetObject="{Binding Path=DataContext,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}}}" 
-											  MethodName="Button_Click"/>
-				// <Interactivity:InvokeCommandAction Command="{Binding CmbBandSelectionChanged}"/>
-			</Interactivity:EventTrigger>
-		</Interactivity:Interaction.Triggers>
-	</Button>
-	~~~
+~~~xaml
+1.通过 事件 
+<Button Click="Button_Click"></Button>
+2.通过 命令
+<Button Command="{Binding Path=DataContext.OprateDataGridRow, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}}}"
+        CommandParameter="{Binding RelativeSource={x:Static RelativeSource.Self}}">
+</Button>	//  RelativeSource.Self     Button 自身作为参数
+3.通过 事件触发器 
+xmlns:Interaction="http://schemas.microsoft.com/expression/2010/interactions"
+xmlns:Interactivity="http://schemas.microsoft.com/expression/2010/interactivity"
+<Button>
+    <Interactivity:Interaction.Triggers>
+        <Interactivity:EventTrigger EventName="Click">
+            <Interaction:CallMethodAction TargetObject="{Binding Path=DataContext,RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}}}" 
+                                          MethodName="Button_Click"/>
+            // <Interactivity:InvokeCommandAction Command="{Binding CmbBandSelectionChanged}"/>
+        </Interactivity:EventTrigger>
+    </Interactivity:Interaction.Triggers>
+</Button>
+~~~
 
-	
+​	
 
-	
 
-	
+### Presenter
 
-	
+Keys：ContentPresenter、ItemsPresenter
+
+```xaml
+<ContentControl Content="Content..." ContentStringFormat="This is {0} !">
+    <ContentControl.Template>
+        <ControlTemplate TargetType="ContentControl">
+            <Border BorderBrush="Blue" BorderThickness="1">
+                <ContentPresenter />
+                <!--<ContentPresenter Content="{TemplateBinding Content}" />-->
+            </Border>
+        </ControlTemplate>
+    </ContentControl.Template>
+</ContentControl>
+
+<TreeView.Template>
+    <ControlTemplate TargetType="{x:Type TreeView}">
+        <Border BorderBrush="Red" BorderThickness="1">
+            <ItemsPresenter />
+        </Border>
+    </ControlTemplate>
+</TreeView.Template>
+```
+
+
+
+
+
 
 ### Template
 
 #### ControlTemplate	
 
-- Keys：ListViewItem、ControlTemplate.Triggers、TargetName
+Keys：ListViewItem、ControlTemplate.Triggers、TargetName
 
 ~~~xaml
 <Style x:Key="ItemContStyle" TargetType="ListViewItem">
@@ -266,8 +375,6 @@ Bind Mode
 	<Setter Property="Foreground" Value="#FFF7EFEF" />
 </Style>
 ~~~
-
-
 
 
 
@@ -467,7 +574,7 @@ ResizeMode="CanResizeWithGrip"	// 右下角 三角形 可缩放
 
 ### TextBox
 
-Keys：InputMethod.IsInputMethodEnabled、PreviewTextInput
+Keys：InputMethod.IsInputMethodEnabled、PreviewTextInput、InputBindings、KeyBinding
 
 ~~~c#
 // 只能输入数字
@@ -478,6 +585,10 @@ public void limitnumber(object sender, TextCompositionEventArgs e)
 	 Regex re = new Regex("[^0-9]+");   
 	 e.Handled = re.IsMatch(e.Text);
 }
+
+~~~
+
+~~~xaml
 // 按下 Enter 键 触发命令
 <TextBox>
 	<TextBox.InputBindings>
@@ -486,6 +597,110 @@ public void limitnumber(object sender, TextCompositionEventArgs e)
 	</TextBox.InputBindings>
 </TextBox>
 ~~~
+
+### ContentControl
+
+<img src="Images\content_control.png" style="zoom:50%;" />
+
+```
+
+```
+
+
+
+### Button
+
+Keys：ControlTemplate、Triggers、IsMouseOver、IsPressed
+
+~~~xaml
+// IconFont-Button Style
+<Style TargetType="Button" x:Key="WindowControlButtonStyle">
+	<Setter Property="Width" Value="40"/>
+	<Setter Property="Height" Value="30"/>
+	<Setter Property="Foreground" Value="White"/>
+	<Setter Property="Template">
+		<Setter.Value>
+			<ControlTemplate TargetType="Button">
+				<Border Background="Transparent" Name="back">
+					<TextBlock Text="{Binding Content,RelativeSource={RelativeSource AncestorType=Button,Mode=FindAncestor}}"
+				   VerticalAlignment="Center" HorizontalAlignment="Center"
+				   FontFamily="../Fonts/#iconfont" FontSize="16"/>
+				</Border>
+				<ControlTemplate.Triggers>
+					<Trigger Property="IsMouseOver" Value="True">
+						<Setter TargetName="back" Property="Background" Value="#22FFFFFF"/>
+					</Trigger>
+					<Trigger Property="IsPressed" Value="True">
+						<Setter TargetName="back" Property="Background" Value="#44FFFFFF"/>
+					</Trigger>
+				</ControlTemplate.Triggers>
+			</ControlTemplate>
+		</Setter.Value>
+	</Setter>
+</Style>
+// Blue Button Style
+<ControlTemplate x:Key="LoginButtonTemplate" TargetType="Button">
+	<Border Background="#007DFA" CornerRadius="5">
+		<Grid>
+			<Border
+				Name="back"
+				Background="#22FFFFFF"
+				CornerRadius="4"
+				Visibility="Hidden" />
+			<ContentControl
+				HorizontalAlignment="Center"
+				VerticalAlignment="Center"
+				Content="{TemplateBinding Content}"
+				Foreground="{TemplateBinding Foreground}" />
+		</Grid>
+	</Border>
+	<ControlTemplate.Triggers>
+		<Trigger Property="IsMouseOver" Value="True">
+			<Setter TargetName="back" Property="Visibility" Value="Visible" />
+		</Trigger>
+		<Trigger Property="IsEnabled" Value="False">
+			<Setter TargetName="back" Property="Visibility" Value="Visible" />
+			<Setter TargetName="back" Property="Background" Value="#EEE" />
+			<Setter Property="Foreground" Value="#AAA" />
+		</Trigger>
+	</ControlTemplate.Triggers>
+</ControlTemplate>
+
+~~~
+
+
+
+
+
+
+
+### RadioButton
+
+Keys：ContentControl、TemplateBinding、Content
+
+```xaml
+<Style TargetType="RadioButton" x:Key="NavButtonStyle">
+    <Setter Property="Foreground" Value="White"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="RadioButton">
+                <Border Background="Transparent" CornerRadius="8" Name="back">
+                    <ContentControl Content="{TemplateBinding Content}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="20,4" FontSize="13"/>
+                </Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsChecked" Value="True">
+                        <Setter TargetName="back" Property="Background" Value="#44FFFFFF"/>
+                    </Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+</Style>
+```
+
+
+
+
 
 ### ComboBox
 
@@ -499,24 +714,86 @@ Keys：DataGridColumnHeader
 
 ### Border
 
-Keys：Effect、DropShadowEffect、ShadowDepth、BlurRadius
+Keys：Effect、DropShadowEffect、ShadowDepth、BlurRadius、ImageBrush
 
 ~~~xaml
-<Border Width="80" Height="80"  VerticalAlignment="Center" HorizontalAlignment="Center"
-        CornerRadius="50"  Margin="0,0,0,20">
-    <Border.Effect>
-        <DropShadowEffect Color="White" ShadowDepth="0" BlurRadius="5" Opacity="0.3" Direction="0"/>
-    </Border.Effect>
-    <Border  Width="90" Height="80" HorizontalAlignment="Center">
-        <Border.Background>
-            <ImageBrush ImageSource="../Assets/Images/Logo.png"/>
-        </Border.Background>
-    </Border>
-    <!--<Border.Background>
-        	<ImageBrush ImageSource="../Assets/Images/Logo.png"/>
-    </Border.Background>-->
+// BlurRadius="5"：	模糊程度	
+// Direction="0"：	相对于内容的角度
+// Opacity="0.3"：	透明度
+// ShadowDepth="0"：	与内容的距离，
+// Color="Gray"：	颜色
+<Border
+	Width="90"
+	Height="80"
+	Margin="0,0,0,20"
+	HorizontalAlignment="Center"
+	VerticalAlignment="Center"
+	CornerRadius="50">
+	<Border.Effect>
+		<DropShadowEffect
+			BlurRadius="5"
+			Direction="0"
+			Opacity="0.3"
+			ShadowDepth="0"
+			Color="White" />
+	</Border.Effect>
+	<Border.Background>
+		<ImageBrush ImageSource="../Assets/Images/Logo.png"></ImageBrush>
+	</Border.Background>
 </Border>
 ~~~
+
+
+
+### ItemsControl
+
+Keys：ItemContainerStyle、ItemTemplate、ItemsPanel、ItemsSource
+
+```xaml
+ItemsControl：ListBox、ListView，TreeView，TabControl
+ItemContainerStyle 	(Item Style)
+ItemTemplate		(Item DataTemplate)
+ItemsPanelTemplate	(Items Panel)
+```
+
+Keys：ItemTemplateSelector (DataTemplateSelector)
+
+```xaml
+xmlns:ass="clr-namespace:WPFItemsControl.Assets"
+<ItemsControl.ItemTemplateSelector>
+	<ass:CourseDataTemplateSelector>
+		<ass:CourseDataTemplateSelector.RealTemplate>
+			<DataTemplate>
+			...
+			</DataTemplate>
+		</ass:CourseDataTemplateSelector.RealTemplate>
+		<ass:CourseDataTemplateSelector.SkeletonTemplate>
+			<DataTemplate>
+			...
+			</DataTemplate>
+		</ass:CourseDataTemplateSelector.SkeletonTemplate>
+	</ass:CourseDataTemplateSelector>
+</ItemsControl.ItemTemplateSelector>
+```
+
+```c#
+public class CourseDataTemplateSelector : DataTemplateSelector
+{
+	public DataTemplate RealTemplate { get; set; }
+	public DataTemplate SkeletonTemplate { get; set; }
+
+	public override DataTemplate SelectTemplate(object item, DependencyObject container)
+	{
+		if ((item as CourseSeriesModel).IsShowSkeleton)
+		{
+			return SkeletonTemplate;
+		}
+
+		return RealTemplate;
+		//return base.SelectTemplate(item, container);
+	}
+}
+```
 
 
 
@@ -524,15 +801,272 @@ Keys：Effect、DropShadowEffect、ShadowDepth、BlurRadius
 
 ### ListView
 
-Keys：ItemContainerStyle、
+Keys：ItemContainerStyle、ItemTemplate、ItemsPanel
+
+```xaml
+
+```
 
 
 
 ### TreeView
 
-Keys：ItemContainerStyle、Header
+Keys：TreeView.Template(ControlTemplate)、TreeViewItem.Template(ControlTemplate)、ItemsPresenter
+
+```xaml
+<x:Array x:Key="templates" Type="{x:Type model:SingleTemplate}">
+	<model:SingleTemplate
+		Name="Template 1"
+		IsAvailable="True"
+		IsTemplateSelected="False"
+		ParentBatID="1"
+		State="0" />
+	<model:SingleTemplate
+		Name="Template 2"
+		IsAvailable="True"
+		IsTemplateSelected="False"
+		ParentBatID="1"
+		State="1" />
+	<model:SingleTemplate
+		Name="Template 3"
+		IsAvailable="True"
+		IsRenaming="True"
+		IsTemplateSelected="False"
+		ParentBatID="1"
+		State="0" />
+</x:Array>
+<x:Array x:Key="Batches" Type="{x:Type model:BatchModel}">
+	<model:BatchModel
+		Name="BatchModel 1"
+		ID="1"
+		IsBatchSelected="False"
+		IsSelected="True"
+		Templates="{StaticResource templates}" />
+	<model:BatchModel
+		Name="BatchModel 2"
+		ID="2"
+		IsBatchSelected="False"
+		Templates="{StaticResource templates}" />
+	<model:BatchModel
+		Name="BatchModel 3"
+		ID="3"
+		IsBatchSelected="True"
+		IsExpanded="True"
+		Templates="{StaticResource templates}" />
+</x:Array>
 
 
+<TreeView Name="tvTestQueue" ItemsSource="{StaticResource Batches}">
+	<TreeView.Template>
+		<ControlTemplate TargetType="{x:Type TreeView}">
+			<Border BorderBrush="Red" BorderThickness="1">
+				<ItemsPresenter />
+			</Border>
+		</ControlTemplate>
+	</TreeView.Template>
+	<TreeView.ItemContainerStyle>
+		<Style TargetType="TreeViewItem">
+			<Setter Property="IsExpanded" Value="True" />
+			<!--<Setter Property="Template">
+				<Setter.Value >
+					<ControlTemplate TargetType="{x:Type TreeViewItem}">
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>-->
+		</Style>
+	</TreeView.ItemContainerStyle>
+
+	<TreeView.Resources>
+		<HierarchicalDataTemplate DataType="{x:Type model:BatchModel}" ItemsSource="{Binding Templates}">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition />
+					<RowDefinition Height="1" />
+				</Grid.RowDefinitions>
+				<Border Name="groupBd" Margin="0">
+					<StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+						<TextBlock
+							x:Name="txtBlockTemplateSetsName"
+							VerticalAlignment="Center"
+							FontSize="12"
+							FontWeight="Bold"
+							Text="{Binding Name}"
+							TextAlignment="Center"
+							Visibility="{Binding IsRenaming, Converter={StaticResource BoolToInversedVisibilityConverter}}" />
+						<TextBox
+							x:Name="txtBoxTemplateSetsName"
+							VerticalAlignment="Center"
+							Focusable="True"
+							FontSize="12"
+							Tag="{Binding ID}"
+							Text="{Binding Name}"
+							TextAlignment="Left"
+							ToolTip="{Binding Name}"
+							Visibility="{Binding ElementName=txtBlockTemplateSetsName, Path=Visibility, Converter={StaticResource InversedVisibilityConverter}}" />
+
+					</StackPanel>
+				</Border>
+				<Border
+					Grid.Row="1"
+					Background="#376BFA"
+					Visibility="{Binding IsDragOver, Converter={StaticResource BoolToVisibilityConverter}}" />
+			</Grid>
+		</HierarchicalDataTemplate>
+
+		<DataTemplate DataType="{x:Type model:SingleTemplate}">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition />
+					<RowDefinition Height="1" />
+				</Grid.RowDefinitions>
+				<Border
+					Name="groupTemp"
+					HorizontalAlignment="Stretch"
+					Background="Transparent">
+					<StackPanel
+						VerticalAlignment="Center"
+						IsEnabled="{Binding IsEnable}"
+						Orientation="Horizontal">
+						<TextBlock
+							x:Name="txtBlockTemplateName"
+							Margin="3,0,0,0"
+							HorizontalAlignment="Left"
+							VerticalAlignment="Center"
+							Text="{Binding Name}"
+							TextAlignment="Center"
+							ToolTip="{Binding Name}"
+							Visibility="{Binding IsRenaming, Converter={StaticResource BoolToInversedVisibilityConverter}}" />
+						<TextBox
+							x:Name="txtBoxTemplateName"
+							HorizontalAlignment="Left"
+							VerticalAlignment="Center"
+							Focusable="True"
+							Tag="{Binding TestId}"
+							Text="{Binding Name}"
+							TextAlignment="Center"
+							ToolTip="{Binding Name}"
+							Visibility="{Binding ElementName=txtBlockTemplateName, Path=Visibility, Converter={StaticResource InversedVisibilityConverter}}" />
+
+						<TextBlock
+							x:Name="txtBlockState"
+							Margin="5,0,0,0"
+							HorizontalAlignment="Left"
+							VerticalAlignment="Center"
+							Foreground="Red"
+							Text="未完成"
+							TextAlignment="Center"
+							Visibility="{Binding State, Converter={StaticResource IntToVisibilityConverter}}" />
+					</StackPanel>
+				</Border>
+				<Border
+					Grid.Row="1"
+					Background="#376BFA"
+					Visibility="{Binding IsDragOver, Converter={StaticResource BoolToVisibilityConverter}}" />
+			</Grid>
+
+		</DataTemplate>
+	</TreeView.Resources>
+</TreeView>
+```
+
+
+
+
+
+### TabControl
+
+Keys：ItemsControl、ItemsSource、ItemTemplate(DataTemplate)、ContentTemplate(DataTemplate)、ItemsPanel
+
+~~~xaml
+<TabControl
+	MinHeight="150"
+	Margin="0,7,0,0"
+	ItemsSource="{Binding TabItems}"
+	SelectedIndex="0">
+	<TabControl.ItemTemplate>
+		<DataTemplate DataType="{x:Type local:TabItem}">
+			<TextBlock Text="{Binding Path=Header}" />
+		</DataTemplate>
+	</TabControl.ItemTemplate>
+	<TabControl.ContentTemplate>
+		<DataTemplate DataType="{x:Type local:TabItem}">
+			<ItemsControl ItemsSource="{Binding AntennaPathlosses}">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate DataType="{x:Type local:AntennaPathloss}">
+						<StackPanel Margin="0,3,0,0" Orientation="Horizontal">
+							<TextBlock
+								Width="70"
+								VerticalAlignment="Center"
+								Text="{Binding Name, StringFormat='{}{0}：', Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+								TextAlignment="Left" />
+							<TextBlock
+								MaxWidth="232"
+								VerticalAlignment="Center"
+								Text="{Binding Pathloss, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+								TextAlignment="Left"
+								TextTrimming="CharacterEllipsis"
+								ToolTip="{Binding Pathloss}" />
+							<Button
+								Width="60"
+								Height="20"
+								Margin="5,0"
+								HorizontalAlignment="Right"
+								Click="AntennaPathlossBtn_Click"
+								Content="{StaticResource trans0157}"
+								Style="{StaticResource GTSStyleButtonWhite}"
+								Tag="{Binding}" />
+						</StackPanel>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<VirtualizingStackPanel />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+			</ItemsControl>
+		</DataTemplate>
+	</TabControl.ContentTemplate>
+</TabControl>
+~~~
+
+~~~csharp
+public AntennaPathloss SingleAntennaPathloss { get; set; } = new AntennaPathloss();
+public ObservableCollection<TabItem> TabItems { get; set; } = new ObservableCollection<TabItem>();
+	
+	
+public class TabItem : NotifyPropertyChanged
+{
+	private string header;
+
+	public string Header
+	{
+		get { return header; }
+		set { header = value; OnPropertyChanged(); }
+	}
+
+	public ObservableCollection<AntennaPathloss> AntennaPathlosses { get; set; } = new ObservableCollection<AntennaPathloss>();
+}
+
+public class AntennaPathloss : NotifyPropertyChanged
+{
+	private string name;
+
+	public string Name
+	{
+		get { return name; }
+		set { name = value; OnPropertyChanged(); }
+	}
+
+	private string pathloss;
+
+	public string Pathloss
+	{
+		get { return pathloss; }
+		set { pathloss = value; OnPropertyChanged(); }
+	}
+}
+~~~
 
 ### Expander
 
@@ -549,11 +1083,15 @@ Keys：ExpandDirection、Hear、Content、IsExpanded
 </Expander>
 ~~~
 
+### 
+
 ### Grid
 
 Keys：
 
 ### UniformGrid
+
+Keys：Columns、Resources、Style、TargetType
 
 ~~~xaml
 <UniformGrid Columns="5" Grid.Row="1">
@@ -854,7 +1392,7 @@ Keys：AllowResample、AnimationAutoStartMode、ArgumentDataMember、CrosshairCo
 > 	</Border>
 > 	~~~
 >
-> 6. Style 无法识别本地元素，ElementName; 
+> 6. Style 无法识别本地元素，ElementName 和 绑定的源属性; 
 >
 > 7. Validation.ErrorTemplate 默认红框不显示，原因：Window类默认的Style包含AdornerDecorator元素， 而UserControl没有。 主要是因为UserControl经常应用在Window里或者其他上下文已经有了AdornerLayer，
 >
@@ -868,6 +1406,8 @@ Keys：AllowResample、AnimationAutoStartMode、ArgumentDataMember、CrosshairCo
 > 	     </AdornerDecorator>
 > 	</UserControl>
 > 	~~~
->
-> 	
+>	
+> 8. 若干个 Control 同时叠加在同一个 Grid 上，可设置 VerticalAlignment 、HorizontalAlignment 以及 Margin 属性，调整 Control 间的相对位置，从而无须创建多余的行和列；
+
+
 
