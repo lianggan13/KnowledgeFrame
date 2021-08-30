@@ -1,0 +1,4 @@
+Many .xaml files can be double-clicked and viewed in Internet Explorer.
+Others cannot (under default security policy) due to using features such as a Window.
+To view these, you should paste the content into the XamlPad SDK tool.
+For examples that reference images, you'll need to update the path so they can be found.

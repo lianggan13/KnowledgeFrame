@@ -1,0 +1,103 @@
+﻿<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:CustomPanel" 
+        Title="CustomPanel"
+    >
+	<DockPanel Margin="20">
+		<TabControl DockPanel.Dock="Top" Height="130">
+			<TabItem Header="Home">
+				<StackPanel Orientation="Horizontal">
+					<GroupBox Header="Clipboard" Padding="2">
+						<c:RibbonPanel>
+							<Grid>
+								<Grid.RowDefinitions>
+									<RowDefinition/>
+									<RowDefinition Height="auto"/>
+								</Grid.RowDefinitions>
+								<Image Grid.Row="0" Stretch="none" Source="iconPaste.bmp"/>
+								<Label Margin="10,0" Grid.Row="1">Paste</Label>
+							</Grid>
+              <Image Source="iconCut.bmp"/>
+              <Image Source="iconCopy.bmp"/>
+              <Image Source="iconFormatPainter.bmp"/>
+            </c:RibbonPanel>
+          </GroupBox>
+          <GroupBox Header="Font">
+            <c:RibbonPanel>
+              <WrapPanel Width="220" VerticalAlignment="Center">
+                <ComboBox Width="100">Calibri (Body)</ComboBox>
+                <ComboBox Width="40" Margin="2,0,0,0">12</ComboBox>
+                <Button Background="White" Width="24" Margin="2,0,0,0">
+                  <Image Stretch="None" Source="iconGrowFont.bmp"/>
+                </Button>
+                <Button Background="White" Width="24">
+                  <Image Stretch="None" Source="iconShrinkFont.bmp"/>
+                </Button>
+                <Button Background="White" Width="24">
+                  <Image Stretch="None" Source="iconFonts.bmp"/>
+                </Button>
+                <Button Background="White" Width="24">
+                  <Image Stretch="None" Source="iconBold.bmp"/>
+                </Button>
+                <Button Background="White" Width="24">
+                  <Image Stretch="None" Source="iconItalic.bmp"/>
+                </Button>
+                <Button Background="White" Width="24">
+                  <Image Stretch="None" Source="iconUnderline.bmp"/>
+                </Button>
+                <Button Background="White" Width="24" Margin="6,0,0,0">
+                  <Image Stretch="None" Source="iconSubscript.bmp"/>
+                </Button>
+                <Button Background="White" Width="24">
+									<Image Stretch="None" Source="iconSuperscript.bmp"/>
+								</Button>
+							</WrapPanel>
+						</c:RibbonPanel>
+					</GroupBox>
+					<GroupBox Header="Paragraph">
+						<c:RibbonPanel>
+							<WrapPanel VerticalAlignment="Center">
+                <Button Background="White" Width="24">
+                  <Image Stretch="None" Source="iconLeft.bmp"/>
+                </Button>
+                <Button Background="White" Width="24">
+                  <Image Stretch="None" Source="iconCenter.bmp"/>
+                </Button>
+                <Button Background="White" Width="24">
+                  <Image Stretch="None" Source="iconRight.bmp"/>
+                </Button>
+                <Button Background="White" Width="24">
+									<Image Stretch="None" Source="iconJustify.bmp"/>
+								</Button>
+							</WrapPanel>
+							<MenuItem Header="Borders">
+								<MenuItem.Icon>
+									<Image Source="iconBorders.bmp"/>
+								</MenuItem.Icon>
+							</MenuItem>
+							<MenuItem Header="Shading Color">
+								<MenuItem.Icon>
+									<Image Source="iconShading.bmp"/>
+								</MenuItem.Icon>
+								<MenuItem/>
+							</MenuItem>
+							<MenuItem Header="Drop Cap">
+								<MenuItem.Icon>
+									<Image Source="iconDropCap.bmp"/>
+								</MenuItem.Icon>
+								<MenuItem/>
+							</MenuItem>
+						</c:RibbonPanel>
+					</GroupBox>
+				</StackPanel>
+			</TabItem>
+			<TabItem Header="Insert"/>
+			<TabItem Header="Page Layout"/>
+			<TabItem Header="References"/>
+			<TabItem Header="Mailings"/>
+			<TabItem Header="Review"/>
+      <TabItem Header="View"/>
+    </TabControl>
+		<RichTextBox/>
+	</DockPanel>
+</Window>

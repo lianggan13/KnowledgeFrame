@@ -1,0 +1,21 @@
+<StackPanel xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+  <Button Width="100">
+    BulgedUp Bevel
+    <Button.BitmapEffect>
+      <BevelBitmapEffect EdgeProfile="BulgedUp"/>
+    </Button.BitmapEffect>
+  </Button>
+  <Button Width="100" Margin="20">
+    Big, Noisy Glow
+    <Button.BitmapEffect>
+      <OuterGlowBitmapEffect GlowSize="20" Noise="1" GlowColor="Red"/>
+    </Button.BitmapEffect>
+  </Button>
+  <TextBlock FontSize="20" HorizontalAlignment="Center"
+    FontFamily="Segoe Print" Foreground="White">
+    Small Glow
+    <TextBlock.BitmapEffect>
+      <OuterGlowBitmapEffect GlowColor="Black" GlowSize="1"/>
+    </TextBlock.BitmapEffect>
+  </TextBlock>
+</StackPanel>

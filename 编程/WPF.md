@@ -1,4 +1,4 @@
-## WPF
+### WPF
 
 ### xmlns:x
 
@@ -38,171 +38,398 @@ Keys：x:Array
 
 ### Binding
 
-Bind Mode
+> Bind Mode
+>
+> ​	 One Way:            UI <---- Model (UI Get)
+>
+> ​	One Way to Source:   UI ----> Model (UI Set)
+>
+> ​	Default(Two Way):    UI <---> Model (UI Get & Set)
 
- One Way:            UI <---- Model (UI Get)
++ Binding Static Class
 
- One Way to Source:   UI ----> Model (UI Set)
+```xaml
 
- Default(Two Way):    UI <---> Model (UI Get & Set)
+Title="{Binding Source={x:Static g:GlobalConfig.Version}, StringFormat='{}MaxSign Auto {0}'}"
+
+public static class GlobalConfig
+{
+	 public static string Version = "V1.7.0";
+}
+
+
+xmlns:com="clr-namespace:GTS.MaxSign.Controls.Assets.Components"
+<Popup Opened="{DXEvent Handler='$com:PopupFocusHelper.Popup_Opened(@sender,@args)'}"/>
+
+namespace GTS.MaxSign.Controls.Assets.Components
+{
+    public static class PopupFocusHelper
+    {
+        public static void Popup_Opened(object sender, System.EventArgs e)
+        {
+            Popup popup = sender as Popup;
+            IntPtr handle = GetHwnd(popup);
+            SetFocus(handle);
+        }
+
+        [DllImport("User32.dll")]
+        public static extern IntPtr SetFocus(IntPtr hWnd);
+
+        public static IntPtr GetHwnd(Popup popup)
+        {
+            HwndSource source = (HwndSource)PresentationSource.FromVisual(popup.Child);
+            return source.Handle;
+        }
+    }
+}
+```
+
++ DxBinding
+
+```xaml
+@s, @Self
+@p, @TemplatedParent
+@e, @ElementName
+@r, @StaticResource
+@a, @FindAncestor
+@c, @DataContext
+@v, @value
+@Reference
+$int, $double, ..., $string, $object, $bool
+
+<TextBlock Text="{DXBinding '@s.PropA'}"/>
+<TextBlock Text="{DXBinding '@Self.PropA'}"/>
+
+<TextBlock Text="{DXBinding '@e(bt).PropA'}"/>
+<TextBlock Text="{DXBinding '@e(myButton).Content'}"/>
+<Button Click="{DXEvent '@e(checkBox).IsChecked=true'}"/>
+<TextBlock Text="{DXBinding '@ElementName(bt).PropA'}"/>
+Legend="{DXBinding '@e(lbLegendMode).SelectedItem.Tag != $local:LegendMode.Common ? @e(defaultPaneLegend) : null'}"
+RisingBarBrush="{DXBinding '@e(lbDataType).SelectedIndex == 0 ? `#DA5859` : null'}"
+
+<TextBlock Text="{DXBinding '@r(resource)'}"/>
+<TextBlock Text="{DXBinding '@StaticResource(resource)'}"/>
+
+<TextBlock Text="{DXBinding '@a($Window).Title'}"/>
+<TextBlock Text="{DXBinding '@a($Window, 1).Title'}"/>
+<TextBlock Text="{DXBinding '@a($ComboBox).Text',Mode=OneTime}" />
+<TextBlock Text="{DXBinding '@FindAncestor($Window).Title'}"/>
+<TextBlock Text="{DXBinding '@FindAncestor($Window, 1).Title'}"/>
+<TextBlock Text="Text" Visibility="{DXBinding $Visibility.Hidden}"/>
+<TextBlock Text="{DXBinding 'typeof($int)'}"/>
+<TextBlock Text="{DXBinding 'typeof($Window)'}"/>
+<TextBlock Text="{DXBinding 'typeof($dx:DXWindow)'}"/>
+<TextBlock Text="{DXBinding '(PropertyA as $dx:DXWindow).CurrentWindow'}"/>
+
+<TextBlock Text="{DXBinding '@c'}"/>
+<TextBlock Text="{DXBinding '@c.PropA'}"/>
+<TextBlock Text="{DXBinding '@DataContext'}"/>
+<TextBlock Text="{DXBinding '@DataContext.PropA'}"/>
+MinLimit="{DXBinding @c.OptimalTemperature + 10, Mode=OneTime}"
+IsEnabled="{DXBinding '!@c.AutoGrid'}" />
+DisplayFormatString="{DXBinding '`0 `+@c.GridAlignment.ToString().ToLower() + `(s)`'}" />
+IsEnabled="{DXBinding '@c.WorkTimeOptionsEnabled and @c.WorkTimeOnly'}"
+
+
+<TextBlock Text="{DXBinding '@Reference(bt).Content'}"/>
+
+<TextBlock Text="{DXBinding '$Application.Current.FindResource(`trans0471`).ToString()'}"/>
+<TextBlock Text="{DXBinding Expr='!$string.IsNullOrEmpty(LogTypeText) ?LogTypeText:$Application.Current.FindResource(`trans0471`)',BackExpr='@v'}"/>
+
+<TextBlock Text="{DXBinding '(double)1'}"/>
+<TextBlock Text="{DXBinding 'Customer.FirstName + ` ` + Customer.LastName'}"/>
+
+<TextBlock Text="{DXBinding '2+2'}"/>
+<TextBlock Text="{DXBinding 'Calculate()'}"/>
+<TextBlock Text="{DXBinding 'PropA+PropB'}"/>
+<TextBlock Text="{DXBinding 'Calculate(PropB)'}"/>
+<TextBlock Text="{DXBinding 'PropA.PropB.Calculate().PropC'}"/>
+<TextBlock Text="{DXBinding 'Calculate(PropA, PropB.Prop1 + 2).PropC'}"/>
+
+
+
+<Control IsEnabled="{DXBinding Expr='!IsDisabled', BackExpr='!@v'}"/>
+<TextBox Text="{DXBinding '!PropA', BackExpr='PropA=!@v'}"/>
+<TextBlock Visibility="{DXBinding EnableBand?`Visible`:`Collapsed`}">
+<TextBlock Visibility="{DXBinding 'TestTasks.Count>0?`Collapsed`:`Visible`'}" />
+<TextBlock Tag="{DXBinding 'PropA+2', BackExpr='$int.Parse(@v)-2', Mode=TwoWay}"/>
+<TextBlock Text="{DXBinding '!PropA', BackExpr='!$bool.Parse(@value)', Mode=TwoWay}"/>
+<Control Visibility="{DXBinding Expr='IsVisible ? `Visible` : `Collapsed`', BackExpr='@v == $Visibility.Visible'}"/>
+<RadioButton IsChecked="{DXBinding Expr='MainContent.GetType() == typeof($local:TestSysView)', BackExpr='true'}" />
+<TextBox Text="{DXBinding 'FirstName + ` ` + LastName', BackExpr='FirstName=@v.Split(` `[0])[0]; LastName=@v.Split(` `[0])[1]'}"/>
+<CheckBox Visibility="{DXBinding '( (@e(btnSkip).IsChecked)  &amp;&amp; (@e(btnSkip).Visibility == $Visibility.Visible))?`Visible`:`Collapsed`'}" />
+
+
+DataSource="{DXBinding 'new $local:WebSitePerformanceIndicator().Data'}"
+DataSource="{DXBinding '$local:RealEstateData.GetAnnualData()'}"
+public static class RealEstateData
+{
+	public static List<RealEstateDataAnnualPoint> GetAnnualData()
+	{
+		...
+	}
+}
+```
+
++ DxEvent
+
+```xaml
+<StackPanel>
+    <StackPanel.DataContext>
+        <local:ViewModel />
+    </StackPanel.DataContext>
+    <Button Content="OK" Loaded="{DXEvent Handler='Initialize()'}" />
+    <Button Content="OK" Loaded="{DXEvent Handler='Initialize(); Load()'}" />
+</StackPanel>
+
+<Button Content="OK" Loaded="{DXEvent Handler='Initialize(@sender.Content, @args, @e(tb).Text)'}"/>
+
+<Button Click="{DXEvent '@e(checkBox).IsChecked=true'}"/>
+
+<Border  MouseDown="{DXEvent Handler=@a($UserControl).DataContext.Legend_MouseDown(@s.DataContext)}">
+ 
+<ContextMenu x:Key="DutMenu" DataContext="{DXBinding @a($TreeView).DataContext}">
+	<MenuItem Click="{DXEvent Handler='AddDutProject(@a($ContextMenu).PlacementTarget)'}" Header="{DynamicResource trans0437}" />
+	<MenuItem Click="{DXEvent Handler='AddDutModel(@a($ContextMenu).PlacementTarget)'}" Header="{DynamicResource trans0438}" />
+	<MenuItem
+		Click="{DXEvent Handler='DeleteDut(@a($ContextMenu).PlacementTarget)'}"
+		Header="{DynamicResource trans0013}"
+		IsEnabled="{DXBinding '(@a($ContextMenu).PlacementTarget.DataContext.Name !=`Default Program`) &amp;&amp; (@a($ContextMenu).PlacementTarget.DataContext.Name !=`Default Model`)'}" />
+	<MenuItem
+		Click="{DXEvent Handler='RenameDut(@a($ContextMenu).PlacementTarget)'}"
+		Header="{DynamicResource trans0016}"
+		IsEnabled="{DXBinding '(@a($ContextMenu).PlacementTarget.DataContext.Name !=`Default Program`) &amp;&amp; (@a($ContextMenu).PlacementTarget.DataContext.Name !=`Default Model`)'}" />
+</ContextMenu>
+```
+
+
 
 ### Triggers
 
-- Keys：Property Trigger、Binding DataTrigger、ControlTemplate.Triggers、MultiDataTrigger、EventTrigger(RouteEvent、Actions、Storyboard)、EventSetter
+Description：通过指定属性的变化或者事件的触发时，更改控件的外观和行为，并且并触发器监测的属性必然为依赖属性，事件必然为路由事件
 
-	~~~xaml
-	// Property Trigger
-	<Style.Triggers>
-		<Trigger Property="IsSelected" Value="True">
-			<Setter Property="Background" Value="White" />
-		</Trigger>
-		<Trigger Property="IsMouseOver" Value="True">
-			<Setter Property="Background" Value="White"/>
-		</Trigger>
-	</Style.Triggers>
-	// Binding DataTrigger
-	<Style.Triggers>
-		<DataTrigger Binding="{Binding IsEnabled}" Value="true">
-			<Setter Property="Cursor" Value="Hand"/>
-		</DataTrigger>
-		<DataTrigger Binding="{Binding IsEnabled}" Value="false">
-			<Setter Property="Cursor" Value="Arrow"/>
-		</DataTrigger>
-	</Style.Triggers>
-	// ControlTemplate.Triggers
-	<ControlTemplate TargetType="{x:Type ListViewItem}">
-		<Border Name="BD_Collector" Background="White" Width="auto" Height="28" Margin="2">
-			<TextBlock Text="{Binding Name}" Margin="20,0,0,0"
-					   VerticalAlignment="Center" FontSize="12" />
-		</Border>
-		<ControlTemplate.Triggers>
-			<Trigger Property="IsMouseOver" Value="True">
-				<Setter TargetName="BD_Collector" Property="Background" Value="#f1f1f1" />
-			</Trigger>
-			<Trigger Property="IsSelected" Value="True">
-				<Setter TargetName="BD_Collector" Property="Background" Value="#376BFA" />
-				<Setter Property="Foreground" Value="White" />
-				<Setter Property="BorderBrush" Value="White" />
-			</Trigger>
-		</ControlTemplate.Triggers>
-	</ControlTemplate>
-	// MultiDataTrigger 
-	<MultiDataTrigger>
-		<MultiDataTrigger.Conditions>
-			<Condition Binding="{Binding IsEditable, RelativeSource={RelativeSource AncestorType={x:Type ComboBox}}}" Value="true"/>
-			<Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="false"/>
-			<Condition Binding="{Binding IsPressed, RelativeSource={RelativeSource Self}}" Value="false"/>
-			<Condition Binding="{Binding IsEnabled, RelativeSource={RelativeSource Self}}" Value="true"/>
-		</MultiDataTrigger.Conditions>
-		<Setter Property="BorderBrush" TargetName="templateRoot" Value="#FF565656"/>
-	</MultiDataTrigger>
-	// EventTrigger
-	<ControlTemplate x:Key="customMarkerPointTemplate">
-		<Grid x:Name="model" Background="Transparent" RenderTransformOrigin="0.5,0.5">
-			<Grid.RenderTransform>
-				<ScaleTransform />
-			</Grid.RenderTransform>
-			<Ellipse
-				Stroke="{Binding Path=PointColor, ConverterParameter=Gray, Converter={StaticResource brushOverlayConverter}}"
-				StrokeThickness="2" />
-			<Ellipse
-				Stroke="{Binding Path=PointColor, ConverterParameter=Gray, Converter={StaticResource brushOverlayConverter}}"
-				StrokeThickness="2"
-				Margin="4" />
-			<Ellipse
-				Margin="8"
-				Opacity="{Binding Opacity}"
-				Fill="{Binding Path=PointColor, ConverterParameter=Gray, Converter={StaticResource brushOverlayConverter}}" />
-			<Grid.Triggers>
-				<EventTrigger
-					RoutedEvent="MouseEnter">
-					<BeginStoryboard>
-						<Storyboard
-							TargetName="model">
-							<DoubleAnimation
-								Duration="0:0:0.25"
-								To="1.5"
-								Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)">
-								<DoubleAnimation.EasingFunction>
-									<BackEase
-										Amplitude="2"
-										EasingMode="EaseOut" />
-								</DoubleAnimation.EasingFunction>
-							</DoubleAnimation>
-							<DoubleAnimation
-								Duration="0:0:0.25"
-								To="1.5"
-								Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)">
-								<DoubleAnimation.EasingFunction>
-									<BackEase
-										Amplitude="2"
-										EasingMode="EaseOut" />
-								</DoubleAnimation.EasingFunction>
-							</DoubleAnimation>
-						</Storyboard>
-					</BeginStoryboard>
-				</EventTrigger>
-				<EventTrigger
-					RoutedEvent="MouseLeave">
-					<BeginStoryboard>
-						<Storyboard
-							TargetName="model">
-							<DoubleAnimation
-								Duration="0:0:0.5"
-								To="1"
-								Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)">
-								<DoubleAnimation.EasingFunction>
-									<CircleEase
-										EasingMode="EaseOut" />
-								</DoubleAnimation.EasingFunction>
-							</DoubleAnimation>
-							<DoubleAnimation
-								Duration="0:0:0.5"
-								To="1"
-								Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleY)">
-								<DoubleAnimation.EasingFunction>
-									<CircleEase
-										EasingMode="EaseOut" />
-								</DoubleAnimation.EasingFunction>
-							</DoubleAnimation>
-						</Storyboard>
-					</BeginStoryboard>
-				</EventTrigger>
-			</Grid.Triggers>
-		</Grid>
-	</ControlTemplate>
-	// EventSetter
-	<EventSetter Event="LostFocus" Handler="ListBoxItem_LostFocus"/>
-	~~~
+Keys：Property Trigger、Binding DataTrigger、ControlTemplate.Triggers、MultiDataTrigger、EventTrigger(RouteEvent、Actions、Storyboard)、EventSetter
 
-#### 属性触发器 (Trigger/MultiTrigger)
+#### Trigger/MultiTrigger
 
-http://www.bubuko.com/infodetail-2501160.html
+```xaml
+// Trigger/MultiTrigger(属性触发器)
+<Style x:Key="ButtonStyle" TargetType="{x:Type Button}">
+    <Style.Triggers>
+        <Trigger Property="IsPressed" Value="True">
+            <Setter Property="Opacity" Value="0.5" />
+        </Trigger>
+        <Trigger Property="IsEnabled" Value="False">
+            <Setter Property="Foreground" Value="Red" />
+        </Trigger>
+    </Style.Triggers>
+</Style>
 
-#### 数据触发器 (DataTrigger/MultiDataTrigger)
+<Style x:Key="MulitTriggerButtonStyle" TargetType="Button">
+    <Style.Triggers>
+        <MultiTrigger>
+            <MultiTrigger.Conditions>
+                <Condition Property="IsPressed" Value="True" />
+                <Condition Property="Background" Value="BlanchedAlmond" />
+            </MultiTrigger.Conditions>
+            <MultiTrigger.Setters>
+                <Setter Property="Foreground" Value="Blue" />
+                <Setter Property="BorderThickness" Value="5" />
+                <Setter Property="BorderBrush" Value="Blue" />
+            </MultiTrigger.Setters>
+        </MultiTrigger>
+    </Style.Triggers>
+</Style>
+```
+
+#### DataTrigger/MultiDataTrigger
+
+```xaml
+// DataTrigger/MultiDataTrigger(数据触发器)
+<DataTemplate.Triggers>
+    <DataTrigger Binding="{Binding Path=Picture}" Value="{x:Null}">
+        <Setter TargetName="viewImage" Property="Source" Value="/Images/noImage.png"/>
+        ……
+    </DataTrigger>
+</DataTemplate.Triggers>
+
+<DataTemplate.Triggers>
+    <MultiDataTrigger>
+        <MultiDataTrigger.Conditions>
+            <Condition Binding="{Binding Path=Picture}" Value="{x:Null}" />
+            <Condition Binding="{Binding Path=Title}" Value="Waterfall" />
+        </MultiDataTrigger.Conditions>
+        <MultiDataTrigger.Setters>
+           <Setter TargetName="viewImage" Property="Source" Value="/Images/noImage.png"/>
+           <Setter TargetName="viewImage" Property="Opacity" Value="0.5" />
+           <Setter TargetName="viewText" Property="Background" Value="Brown" />
+        </MultiDataTrigger.Setters>
+    </MultiDataTrigger>
+</DataTemplate.Triggers> 
+```
+
+#### EventTrigger
+
+```xaml
+// EventTrigger(事件触发器)
+<Border  …>
+    <Border.Triggers>
+        <EventTrigger RoutedEvent="Mouse.MouseEnter">
+            <BeginStoryboard>
+                <Storyboard>
+                    <ColorAnimation Duration="0:0:1" Storyboard.TargetName="MyBorder" 
+                                    Storyboard.TargetProperty="Color" To="Gray" />
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Border.Triggers>
+</Border>
+```
 
 
 
-#### 事件触发器 (EventTrigger)
+### Tree
+
+keys: VisualTree、LogicalTree
+
+```c#
+ public static List<T> GetChildObjects<T>(DependencyObject obj, Type typename) where T : FrameworkElement
+        {
+            DependencyObject child = null;
+            List<T> childList = new List<T>();
+
+            for (int i = 0; i <= VisualTreeHelper.GetChildrenCount(obj) - 1; i++)
+            {
+                child = VisualTreeHelper.GetChild(obj, i);
+
+                if (child is T && (((T)child).GetType() == typename))
+                {
+                    childList.Add((T)child);
+                }
+                childList.AddRange(GetChildObjects<T>(child, typename));
+            }
+            return childList;
+        }
+
+        public static List<T> GetLogicChildObjects<T>(DependencyObject obj, Type typename) where T : FrameworkElement
+        {
+            List<T> childList = new List<T>();
+            foreach (var child in LogicalTreeHelper.GetChildren(obj))
+            {
+                if (child is DependencyObject)
+                {
+                    if (child is T && (((T)child).GetType() == typename))
+                    {
+                        childList.Add((T)child);
+                    }
+                    childList.AddRange(GetLogicChildObjects<T>(child as DependencyObject, typename));
+                }
+            }
+
+            return childList;
+}
+```
+
+```c#
+ ControlHelper.GetLogicChildObjects<ComboBox>(this, typeof(ComboBox))?.ForEach(t =>
+            {
+                t.DropDownClosed -= ComboBox_DropDownClosed2;
+                t.DropDownClosed += ComboBox_DropDownClosed2;
+                t.DropDownOpened -= ComboBox_DropDownOpened;
+                t.DropDownOpened += ComboBox_DropDownOpened;
+            });
+
+            ControlHelper.GetLogicFisrtChildObject<TreeView>(this, typeof(TreeView))?.ForEach(t =>
+            {
+                t.PreviewMouseWheel -= TreeView_PreviewMouseWheel;
+                t.PreviewMouseWheel += TreeView_PreviewMouseWheel;
+            });
+```
+
+
 
 
 
 ### VisualStateManager
 
 > 1. VisualState: 视图状态(Visual States)表示控件在一个特殊的逻辑状态下的样式、外观；
-> 2. VisualStateGroup: 状态组由相互排斥的状态组成，状态组与状态组并不互斥；
-> 3. VisualTransition: 视图转变 (Visual Transitions) 代表控件从一个视图状态向另一个状态转换时的过渡；
+> 2. VisualStateGroup: 状态组由**相互排斥**的状态组成，状态组与状态组并不互斥；
+> 3. VisualTransition: 视图转变 (Visual Transitions) 代表控件从一个视图状态向另一个**状态转换**时的**过渡**；
 > 4. VisualStateManager: 由它负责在代码中来切换到不同的状态；
 
 <img src="Images\visual_state_manager.PNG" style="zoom: 67%;" />
+
+```xaml
+<VisualStateManager.VisualStateGroups>
+    <VisualStateGroup x:Name="CommonStates">
+        <VisualStateGroup.Transitions>
+            <VisualTransition GeneratedDuration="0:0:1" To="MouseOver" />
+            <VisualTransition GeneratedDuration="0:0:1" To="Pressed" />
+            <VisualTransition GeneratedDuration="0:0:1" To="Normal" />
+        </VisualStateGroup.Transitions>
+        <VisualState x:Name="Normal" />
+        <VisualState x:Name="MouseOver">
+            <Storyboard>
+                <ColorAnimation
+                                Storyboard.TargetName="BackgroundBorder"
+                                Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                To="#A1D6FC"
+                                Duration="0" />
+            </Storyboard>
+        </VisualState>
+        <VisualState x:Name="Pressed">
+            <Storyboard>
+                <ColorAnimation
+                                Storyboard.TargetName="BackgroundBorder"
+                                Storyboard.TargetProperty="Background.(SolidColorBrush.Color)"
+                                To="#FCA1A1"
+                                Duration="0" />
+            </Storyboard>
+        </VisualState>
+    </VisualStateGroup>
+</VisualStateManager.VisualStateGroups>
+```
 
 
 
 ### Animation
 
-Keys：BeginStoryboard、Storyboard、DoubleAnimation、Storyboard.TargetName、Storyboard.TargetProperty、Duration、To
+Keys：BeginStoryboard、Storyboard、Storyboard.TargetName、Storyboard.TargetProperty、Duration、To、By
+
+> + LinearAnimation
+> + KeyFrameAnimation
+> + PathAnimation
 
 ```xaml
+Storyboard
+	AutoReverse="True"
+	RepeatBehavior="Forever"
+	Storyboard.TargetName="[Element.Name]"
+	Storyboard.TargetProperty="[Element.Property]"
+	To="[Color]" To="[double]"
+	Duration="[TimeLine]" />
+
+LinearAnimation
+	ColorAnimation
+	PointAnimation
+	DoubleAnimation
+	ThicknessAnimation
+
+KeyFrameAnimation
+	DoubleAnimationUsingKeyFrames
+		<LinearDoubleKeyFrame KeyTime="0:0:0" Value="180" />
+		<DiscreteDoubleKeyFrame  KeyTime="0:0:0.5" Value="180"/>
+		<DiscreteDoubleKeyFrame  KeyTime="0:0:1" Value="100"/>
+		<SplineDoubleKeyFrame  KeySpline="1,0 0.5,1" KeyTime="0:0:1" Value="200" />
+	ColorAnimationUsingKeyFrames
+		<DiscreteColorKeyFrame KeyTime="0:0:0.5" Value="Red" />
+		<DiscreteColorKeyFrame KeyTime="0:0:1" Value="Orange" />
+
+PathAnimation
+	PointAnimationUsingPath
+	DoubleAnimationUsingPath
+
+
 // RadioButton --> RoutEvent:Check、UnCheck --> EventTrigger --> BeginStoryboard --> Storyboard --> DoubleAnimation --> Border
 
 <Storyboard x:Key="UserInfoStoryboard">
@@ -472,54 +699,250 @@ class ValueValidation : ValidationAttribute
 }
 ~~~
 
-### DependencyProperty
 
-Keys：DependencyProperty、Register
+
+### DependencyObject
+
+依赖属性是给自己用的，附加属性是给别人用的
+
+#### DependencyProperty
+
+Keys: DependencyProperty(依赖属性)、Register、PropertyMetadata、PropertyChangedCallbackHandler、CoerceValueCallbackHandler、ValidateValueCallbackHandler
 
 ~~~c#
-public class ImageButton : RadioButton
+// DependencyProperty: 封装数据，作用于动画、样式、绑定...
+// ValidateValueCallback:	检查 属性值
+// CoerceValueCallback: 	检查、强制赋值
+// PropertyChangedCallback: 属性值变更回调
+/* 输入数据，经过 ValidateValueCallback 进行数据验证，验证通过后，
+在经过  CoerceValueCallback 进行数据转换，数据更改后，最后对应的
+属性变更回调方法 PropertyChangedCallback */
+
+public int MyAge
 {
-    public static readonly DependencyProperty NormalImgSourceProperty = DependencyProperty.Register(
-        "NormalImgSource", typeof(ImageSource), typeof(ImageButton), new PropertyMetadata(null));
+	get { return (int)GetValue(MyAgeProperty); }
+	set { SetValue(MyAgeProperty, value); }
+}
 
-    public ImageSource NormalImgSource
-    {
-        get { return (ImageSource)GetValue(NormalImgSourceProperty); }
-        set { SetValue(NormalImgSourceProperty, value); }
-    }
+public static int DefaultAge = 18;
 
-    public static readonly DependencyProperty HoverImgSourceProperty = DependencyProperty.Register(
-        "HoverImgSource", typeof(ImageSource), typeof(ImageButton), new PropertyMetadata(null));
+// 用于MyProperty的封装数据，它可以作用于动画，样式，绑定等等......
+// Using a DependencyProperty as the backing store for MyProperty.  This enables animation, styling, binding, etc..
+public static readonly DependencyProperty MyAgeProperty =
+	DependencyProperty.Register("MyAge", typeof(int), typeof(Window), new PropertyMetadata(18, PropertyChangedCallbackHandler, CoerceValueCallbackHandler), ValidateValueCallbackHandler);
 
-    public ImageSource HoverImgSource
-    {
-        get { return (ImageSource)GetValue(HoverImgSourceProperty); }
-        set { SetValue(HoverImgSourceProperty, value); }
-    }
+// 验证
+private static bool ValidateValueCallbackHandler(object value)
+{
+	if (value is int iValue)
+	{
+		if (iValue > 100 || iValue < DefaultAge)
+		{
+			MessageBox.Show($"年龄 {iValue} 不在允许范围中！");
+		}
+	}
+	return true;
+}
 
-    public static readonly DependencyProperty CheckedImgSourceProperty = DependencyProperty.Register(
-        "CheckedImgSource", typeof(ImageSource), typeof(ImageButton), new PropertyMetadata(null));
-    public ImageSource CheckedImgSource
-    {
-        get { return (ImageSource)GetValue(CheckedImgSourceProperty); }
-        set { SetValue(CheckedImgSourceProperty, value); }
-    }
+// 强制转换
+private static object CoerceValueCallbackHandler(DependencyObject d, object baseValue)
+{
+	if (baseValue is int iValue)
+	{
+		return iValue > 100 || iValue < DefaultAge ? DefaultAge : iValue;
+	}
+	else
+	{
+		return false;
+	}
+}
 
-    static ImageButton()
-    {
-        DefaultStyleKeyProperty.OverrideMetadata(typeof(ImageButton), new FrameworkPropertyMetadata(typeof(ImageButton)));
-
-    }
+// 属性变更
+private static void PropertyChangedCallbackHandler(DependencyObject d, DependencyPropertyChangedEventArgs e)
+{
+	if (d is Window win)
+	{
+		var txt = win?.FindName("TestTextBox") as TextBox;
+		txt.BorderBrush = Brushes.GreenYellow;
+	}
 }
 ~~~
 
 
 
-### AttachedProperty List
+#### AttachedProperty
 
-> + Validation
-> + FocusManager
-> + ToolTipService
+Keys: DependencyObject(依赖对象)、GetValue、SetValue
+
+```c#
+public class ContentTypeDpObj : DependencyObject
+{
+	/// <summary>
+	/// 获取附加属性
+	/// </summary>
+	/// <param name="d"></param>
+	/// <returns></returns>
+	public static Type GetContentType(DependencyObject d)
+	{
+		return (Type)d.GetValue(ContentTypeProperty);
+	}
+
+	/// <summary>
+	/// 设置附加属性
+	/// </summary>
+	/// <param name="d"></param>
+	/// <param name="value"></param>
+	public static void SetContentType(DependencyObject d, Type value)
+	{
+		d.SetValue(ContentTypeProperty, value);
+	}
+	// Using a DependencyProperty as the backing store for ContentType.  This enables animation, styling, binding, etc...
+	public static readonly DependencyProperty ContentTypeProperty =
+		DependencyProperty.Register("ContentType", typeof(Type), typeof(ContentTypeDpObj), new FrameworkPropertyMetadata(null, new PropertyChangedCallback(OnPropertyChanged)));
+
+	private static void OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+	{
+	}
+}
+
+public MainVM()
+{
+	navigateCmd = new RelayCommand<object>((para) =>
+	{
+		Type type = GetContentType(para);
+		ConstructorInfo cti = type.GetConstructor(Type.EmptyTypes);
+		this.MainContent = (FrameworkElement)cti.Invoke(null);
+
+	}, (para) => true);
+
+	NavigateCmd.Execute(typeof(HomePage));
+}
+
+private Type GetContentType(object para)
+{
+	Type type = null;
+	if (para is Type)
+	{
+		type = para as Type;
+	}
+	else if (para is RadioButton rabtn)
+	{
+		// 获取 依赖对象 的 附加属性
+		// var ss  = rabtn.GetValue(ContentTypeDp.ContentTypeProperty);
+		type = ContentTypeDpObj.GetContentType(rabtn);
+	}
+	return type;
+}
+```
+
+
+
+```xaml
+<RadioButton
+	common:ContentTypeDpObj.ContentType="{x:Type vm:HomePage}"
+	Command="{Binding NavigateCmd}"
+	CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}}"
+	Content="Home"
+	IsChecked="True"
+	Style="{DynamicResource RadioBtnStyle.Navigation}" />
+<RadioButton
+	common:ContentTypeDpObj.ContentType="{x:Type vm:CenterPage}"
+	Command="{Binding NavigateCmd}"
+	CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}}"
+	Content="Center"
+	Style="{DynamicResource RadioBtnStyle.Navigation}" />
+<RadioButton
+	common:ContentTypeDpObj.ContentType="{x:Type vm:SettingPage}"
+	Command="{Binding NavigateCmd}"
+	CommandParameter="{Binding RelativeSource={RelativeSource Mode=Self}}"
+	Content="Setting"
+	Style="{DynamicResource RadioBtnStyle.Navigation}" />
+```
+
+
+
+```xaml
+namespace GTS.MaxSign.Controls.Assets.Components
+{
+    public class ComboBoxHelper : DependencyObject
+    {
+        public static readonly DependencyProperty UnitProperty =
+            DependencyProperty.RegisterAttached("Unit", typeof(string), typeof(ComboBoxHelper), new FrameworkPropertyMetadata("", new PropertyChangedCallback(Unit_OnPropertyChanged)));
+
+        public static string GetUnit(DependencyObject d)
+        {
+            return d.GetValue(UnitProperty).ToString();
+        }
+        public static void SetUnit(DependencyObject d, string value)
+        {
+            d.SetValue(UnitProperty, value);
+        }
+        private static void Unit_OnPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            string unit = d.GetValue(UnitProperty).ToString();
+        }
+    }
+}
+
+<ComboBox  com:ComboBoxHelper.Unit="MHz"/>
+<TextBlock Text="{DXBinding '$com:ComboBoxHelper.GetUnit(@p)'}" /> 
+
+```
+
+
+
+
+
+### Geometry
+
+Keys:RectangleGeometry、EllipseGeometry、LineGeometry、PathGeometry
+
+### Visual
+
+Keys:DrawingVisual
+
+### Path
+
+Keys: F n、M x,y、Z、L x,y、A rx,ry,d f1(IsLargeArc) f2(Clockwise) x,y、C x1,y1 x2,y2 x,y、Q x1,y1 x,y、H x、V y、S x2,y2 x,y、DashStyle
+
+```xaml
+<Path Stroke="Black" StrokeThickness="1" Fill="#CCCCFF">
+  <Path.Data>
+    <PathGeometry Figures="M 10,100 C 10,300 300,-160 300,100" />
+  </Path.Data>
+</Path>
+
+<Path Fill="Blue">
+	<Path.Data>
+		<EllipseGeometry
+			x:Name="MyAnimatedEllipseGeometry"
+			Center="10,100"
+			RadiusX="15"
+			RadiusY="15" />
+	</Path.Data>
+</Path>
+
+<Path Fill="Blue">
+	<Path.Data>
+		<RectangleGeometry Rect="0,0,30,30" />
+	</Path.Data>
+</Path>
+
+DashStyle:奇数位，宽度；偶数位，间距
+<Pen Brush=”Black” Thickness=”10” DashStyle=”{x:Static DashStyles.DashDotDot}”/>
+
+Data=”M 300,300 A 100,100 0 1 1 300,299 Z”
+
+M 300,300: 表示起始坐标，字母 M 为 Move, 意思是将画笔移到 300,300 处
+A:  表示 Arc 圆弧，
+100,100:  表示圆弧宽高，圆是两值相同；
+0 表示图形的旋转角度；
+1 当图形设置了旋转角度，并且大于 180度时，才会生效，1 表示取大圆弧，0 表示取小圆弧；
+1 表示画圆时笔画是是顺时针画，需要逆时针时设置为 0；
+300,299 表示终止坐标
+```
+
+
 
 ### Line
 
@@ -550,13 +973,17 @@ Keys：Stroke、StrokeDashArray、StrokeThickness、VisualBrush、StrokeStartLin
 </Border>
 ~~~
 
-### Color
+### Brush
 
-Keys：SolidColorBrush、ColorConverter
+Keys：SolidColorBrush、ColorConverter LinearGradientBrush
 
 ~~~C#
 new SolidColorBrush(Color.FromArgb(0xFF, 0x36, 0xBF, 0x56));
 new SolidColorBrush((Color)ColorConverter.ConvertFromString("#EEF7FF"));
+
+LinearGradientBrush 
+	StartPoint(x,y)	Default:(0,0)
+	EndPoint (x,y)	Default:(1,1)
 ~~~
 
 
@@ -605,6 +1032,31 @@ public void limitnumber(object sender, TextCompositionEventArgs e)
 ```
 
 ```
+
+
+
+### ButtonBase
+
+Keys: ControlTemplate、ContentPresenter、ContentTemplate(DataTemplate)
+
+```xaml
+<ControlTemplate x:Key="TogButtonStyle" TargetType="{x:Type ButtonBase}">
+	<ContentPresenter
+		x:Name="contentPresenter"
+		Margin="{TemplateBinding Padding}"
+		HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+		VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+		dx:BlendHelper2.ThemeInfo="Core\Core\Themes\Office2019Colorful\StandardControls\Button.xaml;8;8"
+		Content="{TemplateBinding Content}"
+		ContentStringFormat="{TemplateBinding ContentStringFormat}"
+		ContentTemplate="{TemplateBinding ContentTemplate}"
+		Focusable="False"
+		RecognizesAccessKey="True"
+		SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+</ControlTemplate>
+```
+
+
 
 
 
@@ -667,10 +1119,6 @@ Keys：ControlTemplate、Triggers、IsMouseOver、IsPressed
 </ControlTemplate>
 
 ~~~
-
-
-
-
 
 
 
@@ -1080,14 +1528,25 @@ Keys：ExpandDirection、Hear、Content、IsExpanded
 	<Expander.Content>
 		<TextBlock TextWrapping="Wrap"  Text="这里是内容。"/>
 	</Expander.Content>
-</Expander>
+</Expander> 
 ~~~
-
-### 
 
 ### Grid
 
 Keys：
+
+### GridSplitter
+
+Keys：ResizeBehavior
+
+```xaml
+ <GridSplitter
+                Grid.Column="1"
+                Width="3"
+                ResizeBehavior="PreviousAndNext" />
+```
+
+
 
 ### UniformGrid
 
@@ -1406,8 +1865,89 @@ Keys：AllowResample、AnimationAutoStartMode、ArgumentDataMember、CrosshairCo
 > 	     </AdornerDecorator>
 > 	</UserControl>
 > 	~~~
->	
+>
 > 8. 若干个 Control 同时叠加在同一个 Grid 上，可设置 VerticalAlignment 、HorizontalAlignment 以及 Margin 属性，调整 Control 间的相对位置，从而无须创建多余的行和列；
-
-
+>
+> 9. Style 中的  DataTrigger 允许 Binding 的源属性：依赖属性、DataContext 的模型属性。
+>
+> 	```xaml
+> 	<Button>
+> 		<Button.Style>
+> 			<Style TargetType="Button">
+> 				<Style.Triggers>
+> 					<DataTrigger Binding="{Binding DataContext.ShowProgress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}" Value="Visible">
+> 						<Setter Property="IsEnabled" Value="False" />
+> 					</DataTrigger>
+> 				</Style.Triggers>
+> 			</Style>
+> 		</Button.Style>
+> 	</Button>
+> 	```
+>
+> 10. Stack 中的 ScrollViewer 无效，而 ScrollViewer -> ItemsControl 有效(超出会出现 Scroll)
+>
+> 11. XAML 引用 CS 枚举、静态、常量字符串
+>
+> 	```xaml
+> 	xmlns:model="clr-namespace:Auto_OTA.Model"
+>
+> 	<DataTrigger Binding="{Binding State}" Value="{x:Static model:TestTaskState.Prepare }">
+> 		<Setter TargetName="PART_TxtState" Property="Text" Value="&#xe61d;"/>
+> 	</DataTrigger>
+> 	```
+>
+> 	```c#
+> 	/// <summary>
+> 	/// 测试任务状态
+> 	/// </summary>
+> 	public enum TestTaskState
+> 	{
+> 		/// <summary>
+> 		/// 未开始/已取消
+> 		/// </summary>
+> 		Prepare,
+> 		/// <summary>
+> 		/// 测试完成
+> 		/// </summary>
+> 		Done,
+> 	}
+> 	```
+>
+> 12. 找不到究竟是谁的 SrcollView Bar？运行起来 --> 查看可视化树 --> 查看源
+>
+> 13. 当父容器 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ，子控件 DataGrid 自动铺满
+>
+> 14. StackPanel 无滚动条？解：在 StackPanel 外加 ScrollViewer，并设置 ScrollViewer MaxHeight
+>
+> 15. ComboBox 的   DisplayMemberPath="name" 的属性 需要 get ; set ;,  public string name { get; set; }
+>
+> 16. DxTheme 会影响 原始控件的样式 和 行为
+>
+> 17. 使用了 DevExpress UI层中的异常可能不会导致主程序异常退出
+>
+> 18. WPF Popup 中 IME 不跟随 TextBox
+>
+> 	```xaml
+> 	 <Popup Opened="PART_Popup_Opened"/>
+> 	```
+>
+> 	```c#
+> 	[DllImport("User32.dll")]
+> 	public static extern IntPtr SetFocus(IntPtr hWnd);
+> 						
+> 	private IntPtr GetHwnd(Popup popup)
+> 	{
+> 	    HwndSource source = (HwndSource)PresentationSource.FromVisual(popup.Child);
+> 	    return source.Handle;
+> 	}
+> 						
+> 	private void PART_Popup_Opened(object sender, System.EventArgs e)
+> 	{
+> 	    Popup popup = sender as Popup;
+> 	    IntPtr handle = GetHwnd(popup);
+> 	    SetFocus(handle);
+> 	}
+> 	```
+>
+> 	19.整体布局用 Grid，局部模块用 HorizontalAlignment、VerticalAlignment + Margin 调整，局部细节可选 Grid、xxxPanel 等
 
