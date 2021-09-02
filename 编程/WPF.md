@@ -1152,11 +1152,24 @@ Keys：ContentControl、TemplateBinding、Content
 
 ### ComboBox
 
+Keys: DisplayMemberPath
+
+```xaml
+<ComboBox
+	x:Name="cmbFunc"
+	Grid.Column="1"
+	DisplayMemberPath="name"
+	ItemsSource="{Binding Functions}"
+	SelectionChanged="{DXEvent Handler='Function_SelectionChanged(@s,@args)'}" />
+```
+
+
+
 
 
 ### DataGrid
 
-Keys：DataGridColumnHeader
+Keys：DataGridColumnHeader 
 
 
 
@@ -1934,13 +1947,13 @@ Keys：AllowResample、AnimationAutoStartMode、ArgumentDataMember、CrosshairCo
 > 	```c#
 > 	[DllImport("User32.dll")]
 > 	public static extern IntPtr SetFocus(IntPtr hWnd);
-> 						
+> 							
 > 	private IntPtr GetHwnd(Popup popup)
 > 	{
 > 	    HwndSource source = (HwndSource)PresentationSource.FromVisual(popup.Child);
 > 	    return source.Handle;
 > 	}
-> 						
+> 							
 > 	private void PART_Popup_Opened(object sender, System.EventArgs e)
 > 	{
 > 	    Popup popup = sender as Popup;
