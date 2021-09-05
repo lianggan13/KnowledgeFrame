@@ -29,6 +29,10 @@ revelation   uncover
 
 spit  mouth: tongue cheek brow
 
+heave lift tow 
+
+speculate guess
+
 stadium PE
 
 arouse thrill inspire
@@ -55,6 +59,8 @@ physician doctor
 
 grind mill coffee
 
+grip cling
+
 molecule element
 
 delicate subtle
@@ -75,7 +81,7 @@ couch bench chair
 
 plenty plentiful abound
 
-pest drone vanish
+persecute
 
 sane
 
@@ -114,7 +120,8 @@ disguise fake pretend
 
 purify pure
 
-clay mud cement
+clay mud cement concrete
+glue 502
 
 nostalgic miss meditate
 
@@ -147,18 +154,21 @@ fleet naval
 
 conserve conservative
 
-
+coach trainer
 
 
 opaque stocking troop  sault 
 
+auditorium audience
 
-
+amend          
 
 
 
 
 visa passport
+
+facet aspect
 
 federation alliance league union coalition
 
@@ -204,6 +214,7 @@ lavatory bathroom restroom Watar.Closet toilet basin
 slim fat 
 
 delivery post freight
+wagon
 
 bid endeavor strive diligent
 
@@ -254,7 +265,9 @@ bruise scar graze
 
 bite pinch
 
-brow cheeck nose waist kindy lung abdomen
+brow cheeck nose waist kindy chest lung abdomen
+
+bronze copper
 
 flee escape
 
@@ -271,6 +284,7 @@ magnetic compass
 fracture break
 
 textcure textile cloth
+silk
 
 magnify ex...
 
@@ -286,22 +300,28 @@ salient conspicuous
 ambiguous blur
 definite
 
-glue 502
+
 
 blunt sharp
+
+shabby old
 
 reserve
 reservier
 
 symphony concert musicale
 
+muscular meat strong
+
 frost fog snow
 
 accommodation hotel
 
 congress meeting
+convene
 
 ignite flame burn
+flare
 
 cereal wheat crop
 
@@ -310,7 +330,28 @@ detective scout
 derive origin
 
 
+arrogant proud
 
+comply 
+betray treason
+refuge spy
 
+grocer store
 
+recur occur
 
+loan lend
+
+racial race 
+minority
+minor
+major
+majesty
+
+lunar moon
+
+ore mineral
+
+consult ask
+
+adolescent junior juvenile teenager young
