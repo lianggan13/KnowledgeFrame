@@ -1265,7 +1265,32 @@ public class CourseDataTemplateSelector : DataTemplateSelector
 Keys：ItemContainerStyle、ItemTemplate、ItemsPanel
 
 ```xaml
-
+<ListView
+	Grid.Row="1"
+	Margin="0,10,0,0"
+	BorderThickness="0"
+	ItemsSource="{Binding EmployeesCollectionView}">
+	<ListView.View>
+		<GridView>
+			<GridViewColumn>
+				<GridViewColumnHeader Content="Name" />
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Padding="0,0,50,0" Text="{Binding Name}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn>
+				<GridViewColumnHeader Content="Title" />
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Padding="0,0,50,0" Text="{Binding JobTitle}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+		</GridView>
+	</ListView.View>
+</ListView>
 ```
 
 
@@ -1947,13 +1972,13 @@ Keys：AllowResample、AnimationAutoStartMode、ArgumentDataMember、CrosshairCo
 > 	```c#
 > 	[DllImport("User32.dll")]
 > 	public static extern IntPtr SetFocus(IntPtr hWnd);
-> 							
+> 								
 > 	private IntPtr GetHwnd(Popup popup)
 > 	{
 > 	    HwndSource source = (HwndSource)PresentationSource.FromVisual(popup.Child);
 > 	    return source.Handle;
 > 	}
-> 							
+> 								
 > 	private void PART_Popup_Opened(object sender, System.EventArgs e)
 > 	{
 > 	    Popup popup = sender as Popup;
