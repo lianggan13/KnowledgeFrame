@@ -39,6 +39,8 @@ arouse thrill inspire
 
 mourn pray
 minister
+cathedral church
+
 
 wicked crime
 corrupt
@@ -48,7 +50,7 @@ sympathize compassion
 
 entail need
 
-jail prison crime 
+jail prison crime sin
 
 deny veto protest
 denial
@@ -100,6 +102,7 @@ evade inevitable
 stagnate
 prosper sprout grow
 prosperous
+prosperity
 
 benign mercy
 
@@ -213,8 +216,9 @@ lavatory bathroom restroom Watar.Closet toilet basin
 
 slim fat 
 
+divert
 delivery post freight
-wagon
+wagon cab taxi car 
 
 bid endeavor strive diligent
 
@@ -234,6 +238,8 @@ lens glasses
 opponent enemy
 
 dimension 3D
+
+facilitate improve
 
 acquaint acquaintance
 
@@ -265,7 +271,7 @@ bruise scar graze
 
 bite pinch
 
-brow cheeck nose waist kindy chest lung abdomen
+brow cheeck nose waist kindy chest lung abdomen bowel
 
 bronze copper
 
@@ -311,7 +317,8 @@ reservier
 
 symphony concert musicale
 
-muscular meat strong
+muscular meat 
+robust strong 
 
 frost fog snow
 
@@ -355,3 +362,30 @@ ore mineral
 consult ask
 
 adolescent junior juvenile teenager young
+
+swallow eat
+
+gap
+
+indignant
+
+assess evaluate appraisal
+
+norn rule standard
+
+roar shout
+
+vulgar sex
+
+cassette box
+
+beneath under
+
+medicine
+dose
+
+qualification permission
+
+reckless
+
+grope touch
