@@ -25,6 +25,8 @@ teach inpart
 
 discreet  serious
 
+cloak cover
+
 revelation   uncover
 
 spit  mouth: tongue cheek brow
@@ -50,7 +52,8 @@ sympathize compassion
 
 entail need
 
-jail prison crime sin
+jail prison 
+crime sin
 
 deny veto protest
 denial
@@ -76,7 +79,10 @@ regin emperor monarch
 
 contagious infectious
 plague disease
+medicine
 dose
+clinic
+
 
 democracy civilization
 couch bench chair
@@ -104,6 +110,8 @@ prosper sprout grow
 prosperous
 prosperity
 
+bud flower
+
 benign mercy
 
 cue denote imply herald
@@ -130,7 +138,7 @@ nostalgic miss meditate
 
 summary concise
 
-hamper barrier
+hamper barrier desolato
 
 opaque transparent
 
@@ -147,6 +155,7 @@ territory land
 
 lottery premium
 
+remedy solution
 
 
 bone skeleton
@@ -289,6 +298,7 @@ magnetic compass
 
 fracture break
 
+copej
 textcure textile cloth
 silk
 
@@ -321,6 +331,7 @@ muscular meat
 robust strong 
 
 frost fog snow
+spray fog
 
 accommodation hotel
 
@@ -358,6 +369,7 @@ majesty
 lunar moon
 
 ore mineral
+particle
 
 consult ask
 
@@ -381,11 +393,30 @@ cassette box
 
 beneath under
 
-medicine
-dose
 
-qualification permission
 
-reckless
+qualification eligible permission licence
+
+reckless arbitrary
 
 grope touch
+
+
+
+rhetoric language
+
+foul dirty
+notorious
+
+lounge dayroom break-room
+
+ridge valley
+
+wet humid
+
+marriage 
+divorce
+
+molecular particle
+
+envelope letter
