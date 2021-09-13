@@ -54,6 +54,7 @@ entail need
 
 jail prison 
 crime sin
+conviction
 
 deny veto protest
 denial
@@ -82,6 +83,7 @@ plague disease
 medicine
 dose
 clinic
+surgery
 
 
 democracy civilization
@@ -381,7 +383,7 @@ gap
 
 indignant
 
-assess evaluate appraisal
+assess evaluate appraisal estimate 评
 
 norn rule standard
 
@@ -413,6 +415,8 @@ lounge dayroom break-room
 ridge valley
 
 wet humid
+soak 
+
 
 marriage 
 divorce
@@ -420,3 +424,36 @@ divorce
 molecular particle
 
 envelope letter
+
+stamp 
+
+discreet cautious
+
+basement cellar
+
+marvelous  fantastic
+
+spacious wide
+
+oral
+vocal vowel
+
+perpetual
+
+grieve sorrow miserable
+
+mass tangle
+
+valve
+threshold
+
+inspiration
+
+rhetoric phrase
+
+simultaneous synchronous
+asynchronous 
+
+thunder  lightning
+
+plumber
