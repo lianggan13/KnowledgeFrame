@@ -1,5 +1,65 @@
 ## WPF
 
+### xmlns
+
+Keys: xmlns:x、x:Class、InitializeComponent
+
+```xaml
+xmlns:x 命名空间，并将其映射到为代码隐藏类型添加支持的架构。 
+x:Class 特性用于将代码 隐藏类与此特定 XAML 标记相关联
+InitializeComponent ，以将标记中定义的 UI 与代码隐藏类合并在一起
+x:Class 和 InitializeComponent 的组合可 确保在创建实现时正确地对其进行初始化。
+```
+
+Keys：x:Array、System
+
+```xaml
+
+<x:Array x:Key="Legends" Type="{x:Type model:LegendModel}">
+    <model:LegendModel
+                       Name="30°"
+                       IsChecked="False"
+                       LegendBrush="Blue" />
+    <model:LegendModel
+                       Name="50°"
+                       IsChecked="False"
+                       LegendBrush="Green" />
+    <model:LegendModel
+                       Name="120°"
+                       IsChecked="True"
+                       LegendBrush="Red" />
+</x:Array>
+
+xmlns:sys="clr-namespace:System;assembly=System"
+xmlns:sys="clr-namespace:System;assembly=mscorlib"
+
+<x:Array x:Key="datas" Type="sys:Boolean">
+	<sys:Boolean>false</sys:Boolean>
+	<sys:Boolean>false</sys:Boolean>
+	<sys:Boolean>true</sys:Boolean>
+	<sys:Boolean>false</sys:Boolean>
+	<sys:Boolean>false</sys:Boolean>
+</x:Array>
+```
+
+Keys: x:reference
+
+```xaml
+ElementName是通过查找可视树找到对应控件，但有些控件，如DataGrid控件中的Header属性，MenuItem中的Header属性，不在可视树中，便找不到对应控件，此时可采用x:reference替代。
+```
+
+Keys: XmlnsDefinition
+
+```
+程序集多个命名空间 单一映射
+[assembly: XmlnsDefinition("http://www.yd-tec.com/winfx/xaml/shared", "Y.Shen12DP.App.Ctls")]
+[assembly: XmlnsDefinition("http://www.yd-tec.com/winfx/xaml/shared", "Y.Shen12DP.App.Ctls.Converters")]
+
+ xmlns:ctls="http://www.yd-tec.com/winfx/xaml/shared"
+```
+
+
+
 ### Animation
 
 Keys：BeginStoryboard、Storyboard、Storyboard.TargetName、Storyboard.TargetProperty、Duration、To、By
@@ -67,58 +127,6 @@ PathAnimation
 	</Border.RenderTransform>
 </Border>
 ```
-
-
-
-### xmlns:x
-
-Keys: xmlns:x、x:Class、InitializeComponent
-
-```xaml
-xmlns:x 命名空间，并将其映射到为代码隐藏类型添加支持的架构。 
-x:Class 特性用于将代码 隐藏类与此特定 XAML 标记相关联
-InitializeComponent ，以将标记中定义的 UI 与代码隐藏类合并在一起
-x:Class 和 InitializeComponent 的组合可 确保在创建实现时正确地对其进行初始化。
-```
-
-Keys：x:Array、System
-
-```xaml
-
-<x:Array x:Key="Legends" Type="{x:Type model:LegendModel}">
-    <model:LegendModel
-                       Name="30°"
-                       IsChecked="False"
-                       LegendBrush="Blue" />
-    <model:LegendModel
-                       Name="50°"
-                       IsChecked="False"
-                       LegendBrush="Green" />
-    <model:LegendModel
-                       Name="120°"
-                       IsChecked="True"
-                       LegendBrush="Red" />
-</x:Array>
-
-xmlns:sys="clr-namespace:System;assembly=System"
-xmlns:sys="clr-namespace:System;assembly=mscorlib"
-
-<x:Array x:Key="datas" Type="sys:Boolean">
-	<sys:Boolean>false</sys:Boolean>
-	<sys:Boolean>false</sys:Boolean>
-	<sys:Boolean>true</sys:Boolean>
-	<sys:Boolean>false</sys:Boolean>
-	<sys:Boolean>false</sys:Boolean>
-</x:Array>
-```
-
-Keys: x:reference
-
-```xaml
-ElementName是通过查找可视树找到对应控件，但有些控件，如DataGrid控件中的Header属性，MenuItem中的Header属性，不在可视树中，便找不到对应控件，此时可采用x:reference替代。
-```
-
-
 
 ### MVVM Foundation
 
@@ -2740,7 +2748,49 @@ Keys：CacheMode
 >     分页
 >     ```
 >
->     24.编译器报错，运行没问题，可尝试删除 .vs 文件夹
+> 24.编译器报错，运行没问题，可尝试删除 .vs 文件夹
+>
+> 25.WindowChrome 阴影
+>
+> ```xaml
+> <Window
+>     AllowsTransparency="True"
+>     Background="Transparent"
+>     FontFamily="Microsoft YaHei"
+>     ResizeMode="NoResize"
+>     WindowStartupLocation="CenterScreen"
+>     WindowStyle="None"
+>     mc:Ignorable="d">
+>     <WindowChrome.WindowChrome>
+>         <WindowChrome
+>             CornerRadius="0"
+>             GlassFrameThickness="-1"
+>             NonClientFrameEdges="None"
+>             ResizeBorderThickness="0"
+>             UseAeroCaptionButtons="False" />
+>     </WindowChrome.WindowChrome>
+>   
+>     <Window.DataContext>
+>         <vm:LoginViewModel x:Name="VM" />
+>     </Window.DataContext>
+> 
+>     <Grid>
+>         <Border
+>             Margin="5"
+>             BorderBrush="#999999"
+>             CornerRadius="5">
+>             <Border.Effect>
+>                 <DropShadowEffect
+>                     BlurRadius="10"
+>                     ShadowDepth="0"
+>                     Color="LightGray" />
+>             </Border.Effect>
+> 		</Border>
+> 	</Grid>
+> </Window>
+> ```
+>
+> 
 
 
 

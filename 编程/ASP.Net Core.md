@@ -1,11 +1,5 @@
 ## ASP.Net Core
 
-
-
-
-
-
-
 ### Data Controller-View
 
 Keys: ViewBag、ViewData、TempData、Session
@@ -36,7 +30,7 @@ public IActionResult Index()
 <h2>User5=@Model</h2>
 ```
 
-### AOP-Filter
+### Filter
 
 Keys: IResourceFilter、IAsyncResourceFilter
 ```c#
@@ -143,18 +137,328 @@ public class CustomAllActionResultFilterAttribute : ActionFilterAttribute
 ```
 
 
-
-
-
-
 Keys: AuthorizeAttribute
 
 ```c#
-// 权限验证
+// Config Authentication
+builder.Services.AddAuthentication(option =>
+{
+    //options.RequireAuthenticatedSignIn = false;
+    option.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    option.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    option.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    option.DefaultForbidScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    option.DefaultSignOutScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+}).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, option =>
+{
+    //如果没有找到用户信息--->鉴权失败-->授权失败--->就跳转到指定的  [HttpGet] Action
+    option.LoginPath = "/api/user/login";
+    option.AccessDeniedPath = "/api/exception/unauthorized";
+});
+
+// Config Authorization
+builder.Services.AddAuthorization(options =>
+{
+    // 定义策略
+    options.AddPolicy(AuthorizePolicy.UserPolicy, policyBuilder =>
+    {
+        policyBuilder.RequireRole("Admin");
+        policyBuilder.RequireClaim("Account", "Administrator");
+        policyBuilder.AddRequirements(new AuthKeyRequirement());
+
+        policyBuilder.RequireAssertion(context =>
+        {
+            bool pass1 = context.User.HasClaim(c => c.Type == ClaimTypes.Role);
+            bool pass2 = context.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value == "Admin";
+            bool pass3 = context.User.Claims.Any(c => c.Type == ClaimTypes.Name);
+            bool pass = pass1 && pass2 && pass3;
+            return pass;
+        });
+    });
+});
+// 策略授权 Requirement 扩展
+builder.Services.AddTransient<IAuthorizationHandler, AuthKeyHander>();
+
+app.UseAuthentication(); // 身份验证 中间件 在允许用户访问安全资源之前尝试对用户进行身份验证
+app.UseAuthorization();  // 身份授权 中间件 授权用户访问安全资源
+
+
 ```
 
+```c#
+public class AuthKeyRequirement : IAuthorizationRequirement
+{
+	public const string AuthKey = nameof(AuthKey);
+}
 
+public class AuthKeyHander : AuthorizationHandler<AuthKeyRequirement>
+{
+	protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, AuthKeyRequirement requirement)
+	{
 
+		var httpContext = context.Resource as HttpContext;
+		var ss = httpContext.Request.Headers[AuthKeyRequirement.AuthKey];
+		var key = ss.ElementAtOrDefault(0);
+
+		if (key == "8888888888888888")
+		{
+			context.Succeed(requirement); // pass
+		}
+
+		return Task.CompletedTask;
+	}
+}
+```
+
+```c#
+// 标记策略
+[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Roles = "Admin,User")]
+[HttpGet]
+public async Task<IActionResult> Query()
+{
+	IEnumerable<User> users = dbService.UserColl.Find(_ => true).ToEnumerable();
+	return await Task.FromResult(Json(users));
+}
+
+[Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme, Policy = AuthorizePolicy.UserPolicy)]
+[HttpGet]
+public async Task<IActionResult> Query2()
+{
+	IEnumerable<User> users = dbService.UserColl.Find(_ => true).ToEnumerable();
+	return await Task.FromResult(Json(users));
+}
+
+[HttpGet]
+public async Task<IActionResult> Login()
+{
+	//var user = HttpContext.User;
+	return await Login(name: "lianggan13", password: "1918");
+}
+
+[HttpPost]
+public async Task<IActionResult> Login(string name, string password)
+{
+	IActionResult? result = null;
+	if (name == "lianggan13" && password == "1918")
+	{
+		var claims = new List<Claim>()//鉴别你是谁，相关信息
+		{
+			new Claim("Userid","1"),
+			new Claim(ClaimTypes.Role,"Admin"),
+			new Claim(ClaimTypes.Role,"User"),
+			new Claim(ClaimTypes.Name,$"{name}--来自于Cookies"),
+			new Claim(ClaimTypes.Email,$"18672713698@163.com"),
+			new Claim("password",password),//可以写入任意数据
+			new Claim("Account","Administrator"),
+			new Claim("role","admin"),
+			new Claim("QQ","1030499676"),
+			//new Claim("AuthKey","8888888888888888")
+		};
+		ClaimsPrincipal userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, "Customer"));
+		HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, userPrincipal, new AuthenticationProperties
+		{
+			ExpiresUtc = DateTime.UtcNow.AddMinutes(3),//过期时间：30分钟
+		}).Wait();
+		result = RedirectToAction(nameof(Query));
+	}
+	else
+	{
+		result = RedirectToAction(nameof(Login));
+	}
+
+	return await Task.FromResult(result);
+}
+```
+
+Keys: lifetime
+
+```c#
+a.验证权限，进入到Authorization 
+b.ResourceFilter 中的 - OnResourceExecuting 
+c.开始创建控制器实例 
+d.ActionFilter 中的 - OnActionExecuting 
+e.执行Action方法 
+f.ActionFilter 中的 - OnActionExecuted 
+g.ResultFilter 中的 - OnResultExecuting 
+h.AlwaysRunResultFilter 中的 - OnResultExecuting 
+i.渲染视图 
+j.AlwaysRunResultFilter 中的 - OnResultExecuted 
+k.ResultFilter 中的 - OnResultExecuted 
+l.ResourceFilter中的 - OnResourceExecuted
+```
+
+Keys: JWT Authorize
+
+```
+Jwt授权-颁发Token
+https://jwt.io/
+```
+
+### Middleware
+
+```
+RequestDelegate 委托
+delegate Task RequestDelegate(HttpContext context)
+每个中间件在构建后就是一个 RequestDelegate 委托对象
+
+终点中间件
+整个中间件流水线后的最后一个中间件
+使用 ApplicationBuilder.Run 注册
+
+中间件做决策
+IApplicationBuilder.Map
+IApplicationBuilder.MapWhen
+```
+
+### ServiceCollection
+
+Keys: AddSingleton、AddTransient、AddScoped、BuildServiceProvider、GetService
+
+```c#
+AddSingleton：单例生命周期：同一个类型，创建出来的是同一个实例
+AddTransient：瞬时生命周期,每一次创建都是是一个全新的实例
+AddScoped：作用域生命周期： 同一个serviceProvider获取到的是同一个实例
+```
+
+### Autofac
+
+Keys: ContainerBuilder、RegisterType、RegisterInstance、Register
+
+```c#
+//注册抽象和具体普通类 RegisterType
+{
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	containerBuilder.RegisterType<Microphone>().As<IMicrophone>();
+	IContainer container = containerBuilder.Build();
+	IMicrophone microphone = container.Resolve<IMicrophone>();
+}
+
+//注册一个具体的实例 RegisterInstance
+{
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	containerBuilder.RegisterInstance(new Microphone());
+	IContainer container = containerBuilder.Build();
+	IMicrophone microphone = container.Resolve<Microphone>();
+}
+
+{
+	////注册一段业务逻辑 Register
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	containerBuilder.RegisterType<Microphone>().As<IMicrophone>();
+	containerBuilder.Register<IPower>(context =>
+	{
+		//这里的业务逻辑负责创建出IPower 的实例---可以给一个入口，我们自己来创建对象的实例
+		IMicrophone microphone = context.Resolve<IMicrophone>();
+		IPower power = new Power(microphone);
+
+		return power;
+	});
+	IContainer container = containerBuilder.Build();
+	IPower power = container.Resolve<IPower>();
+}
+
+//注册泛型 RegisterGeneric
+{
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	containerBuilder.RegisterGeneric(typeof(List<>)).As(typeof(IList<>));
+	containerBuilder.RegisterType<Microphone>().As<IMicrophone>();
+	IContainer container = containerBuilder.Build();
+	IList<IMicrophone> microphonelist = container.Resolve<IList<IMicrophone>>();
+}
+
+//注册程序集 RegisterAssemblyTypes
+{
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	Assembly interfaceAssembly = Assembly.LoadFrom("Advanced.NET6.Business.Interfaces.dll");
+	Assembly serviceAssembly = Assembly.LoadFrom("Advanced.NET6.Business.Services.dll");
+	containerBuilder.RegisterAssemblyTypes(interfaceAssembly, serviceAssembly).AsImplementedInterfaces();
+	IContainer container = containerBuilder.Build();
+	IEnumerable<IMicrophone> microphonelist = container.Resolve<IEnumerable<IMicrophone>>();
+}
+```
+
+Keys: UsingConstructor、PropertiesAutowired、PropertySelector、OnActivated
+
+```c#
+//如果有多个构造函数，默认选择构造函数参数最多构造函数了
+//如果希望选择其中只有一个构造函数参数的构造函数 UsingConstructor
+{
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	containerBuilder.RegisterType<Microphone>()
+		.As<IMicrophone>();
+	containerBuilder.RegisterType<Power>()
+		 .UsingConstructor(typeof(IMicrophone), typeof(IMicrophone)) //选择类型为IMicrophone 且参数的数量只有一个的构造函数
+		.As<IPower>();
+	IContainer container = containerBuilder.Build();
+	IPower power = container.Resolve<IPower>();
+}
+
+//属性注入 PropertiesAutowired
+{
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	containerBuilder.RegisterType<Microphone>().As<IMicrophone>();
+	containerBuilder.RegisterType<Power>().As<IPower>();
+	containerBuilder.RegisterType<Headphone>().As<IHeadphone>();
+	containerBuilder.RegisterType<ApplePhone>().As<IPhone>()
+		.PropertiesAutowired(); //表示要支持属性注入： 在对象创建出来以后，自动给属性创建实例，赋值上去
+
+	IContainer container = containerBuilder.Build();
+	IPhone iPhone = container.Resolve<IPhone>();
+}
+
+//属性注入--支持 PropertySelector
+{
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	containerBuilder.RegisterType<Microphone>().As<IMicrophone>();
+	containerBuilder.RegisterType<Power>().As<IPower>();
+	containerBuilder.RegisterType<Headphone>().As<IHeadphone>();
+	containerBuilder.RegisterType<ApplePhone>().As<IPhone>()
+		.PropertiesAutowired(new CusotmPropertySelector()); //表示要支持属性注入： 在对象创建出来以后，自动给属性创建实例，赋值上去
+
+	IContainer container = containerBuilder.Build();
+	IPhone iPhone = container.Resolve<IPhone>();
+}
+
+//方法注入 OnActivated
+{
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	containerBuilder.RegisterType<Microphone>().As<IMicrophone>();
+	containerBuilder.RegisterType<Power>().As<IPower>();
+	containerBuilder.RegisterType<Headphone>().As<IHeadphone>();
+	containerBuilder.RegisterType<ApplePhone>().As<IPhone>()
+		.OnActivated(activa =>
+		{
+			IPower power = activa.Context.Resolve<IPower>();
+			activa.Instance.Init123456678890(power);
+		});
+
+	IContainer container = containerBuilder.Build();
+	IPhone iPhone = container.Resolve<IPhone>();
+}
+```
+
+Keys: Keyed、ResolveKeyed
+
+```c#
+//单抽象多实现
+//1.默认创建出的对象是后面注册的这个Service Keyed
+//2.需要在注册的时候，给定一个标识，然后在获取的时候，也把标识指定，就会按照标识来匹配创建对象
+{
+	ContainerBuilder containerBuilder = new ContainerBuilder();
+	//containerBuilder.RegisterType<Microphone>().As<IMicrophone>();
+	//containerBuilder.RegisterType<MicrophoneNew>().As<IMicrophone>();
+
+	containerBuilder.RegisterType<Microphone>().Keyed<IMicrophone>("Microphone");
+	containerBuilder.RegisterType<MicrophoneNew>().Keyed<IMicrophone>("MicrophoneNew");
+
+	IContainer container = containerBuilder.Build();
+	//IMicrophone microphone = container.Resolve<IMicrophone>();
+	IEnumerable<IMicrophone> microphonelist = container.Resolve<IEnumerable<IMicrophone>>();
+
+	IMicrophone microphone2 = container.ResolveKeyed<IMicrophone>("Microphone");
+	IMicrophone microphone3 = container.ResolveKeyed<IMicrophone>("MicrophoneNew");
+}
+```
 
 
 
@@ -332,8 +636,6 @@ app.MapReverseProxy();
 
 
 
-
-
 ### Log4Net
 
 ```
@@ -345,4 +647,54 @@ https://www.cnblogs.com/liushen/p/Findout_Why_IIS_Has_Not_Log_But_Console_Has.ht
 ```
 
 
+
+
+
+
+
+
+
+### Experience
+
++ 解决跨域问题
+
+```c#
+// 1.通过添加 Header 
+HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*"); 
+public class CustomCorsActionFilterAttribute : Attribute, IActionFilter
+{
+
+	public void OnActionExecuting(ActionExecutingContext context)
+	{
+		context.HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*"); 
+	}
+
+	public void OnActionExecuted(ActionExecutedContext context)
+	{
+	   
+	}
+}
+
+// 2.通过添加 Cores
+builder.Services.AddCors(policy =>
+{
+    policy.AddPolicy("CorsPolicy", opt => opt
+    .AllowAnyOrigin()
+    .AllowAnyHeader()
+    .AllowAnyMethod()
+    .WithExposedHeaders("X-Pagination"));
+});
+
+app.UseCors("CorsPolicy");
+```
+
++ applicationUrl 配置
+
+```
+"applicationUrl": "http://0.0.0.0:8081",
+"applicationUrl": "http://localhost:8081",
+
+localhost是127.0.0.1的别名，只允许本机自己访问自己。
+0.0.0.0的话，允许其它机器访问自己
+```
 
