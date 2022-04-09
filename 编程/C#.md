@@ -1,4 +1,35 @@
-### C#
+## C#
+
+### C# 10.0
+
+Keys: with、record
+
+```c#
+var parse = (string s) => int.Parse(s);
+var choose = [Obsolete] object (bool b) => b ? 1 : "2";
+
+var apples = new { Item = "Apples", Price = "1.19" };
+Console.WriteLine($"original apples: {apples}");
+var saleApples = apples with { Price = "0.79" };
+Console.WriteLine($"sale apples: {saleApples}");
+
+public readonly record struct Point1(double X, double Y, double Z);
+
+public record struct Point2
+{
+    public double X { get; init; }
+    public double Y { get; init; }
+    public double Z { get; init; }
+}
+
+public record Person
+{
+    public string FirstName { get; set; } = default!;
+    public string LastName { get; set; } = default!;
+};
+```
+
+
 
 #### 类型
 

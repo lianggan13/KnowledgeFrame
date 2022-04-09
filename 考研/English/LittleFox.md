@@ -8,7 +8,7 @@
 
 #### 课外阅读
 
-LittleFox目录
+LittleFox 目录
 
 【第3阶段：10部】
 1. 《Wizard and Cat》（72篇）AR2.2

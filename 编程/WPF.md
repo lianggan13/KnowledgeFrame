@@ -815,6 +815,59 @@ CurrentTrackChangedRoutedEventArgs args = new CurrentTrackChangedRoutedEventArgs
 RaiseEvent(args)
 ```
 
+```c#
+// sample: Control class MouseDoubleClickEvent
+public static readonly RoutedEvent MouseDoubleClickEvent;
+
+MouseDoubleClickEvent = EventManager.RegisterRoutedEvent("MouseDoubleClick", RoutingStrategy.Direct, typeof(MouseButtonEventHandler), typeof(Control));
+
+public event MouseButtonEventHandler MouseDoubleClick
+{
+	add
+	{
+		AddHandler(MouseDoubleClickEvent, value);
+	}
+	remove
+	{
+		RemoveHandler(MouseDoubleClickEvent, value);
+	}
+}
+
+private static void HandleDoubleClick(object sender, MouseButtonEventArgs e)
+{
+	if (e.ClickCount == 2)
+	{
+		Control control = (Control)sender;
+		MouseButtonEventArgs mouseButtonEventArgs = new MouseButtonEventArgs(e.MouseDevice, e.Timestamp, e.ChangedButton, e.StylusDevice);
+		if (e.RoutedEvent == UIElement.PreviewMouseLeftButtonDownEvent || e.RoutedEvent == UIElement.PreviewMouseRightButtonDownEvent)
+		{
+			mouseButtonEventArgs.RoutedEvent = PreviewMouseDoubleClickEvent;
+			mouseButtonEventArgs.Source = e.OriginalSource;
+			mouseButtonEventArgs.OverrideSource(e.Source);
+			control.OnPreviewMouseDoubleClick(mouseButtonEventArgs);
+		}
+		else
+		{
+			mouseButtonEventArgs.RoutedEvent = MouseDoubleClickEvent;
+			mouseButtonEventArgs.Source = e.OriginalSource;
+			mouseButtonEventArgs.OverrideSource(e.Source);
+			control.OnMouseDoubleClick(mouseButtonEventArgs);
+		}
+		if (mouseButtonEventArgs.Handled)
+		{
+			e.Handled = true;
+		}
+	}
+}
+
+protected virtual void OnMouseDoubleClick(MouseButtonEventArgs e)
+{
+	RaiseEvent(e);
+}
+```
+
+
+
 ### Style
 
 Keys: 通用 Style
@@ -830,46 +883,67 @@ Keys: 通用 Style
 
 
 
-### VisualTreeHelper
+### Visual/Logical Tree
 
 keys: VisualTree、LogicalTree
 
 ```c#
- public static List<T> GetChildObjects<T>(DependencyObject obj, Type typename) where T : FrameworkElement
-        {
-            DependencyObject child = null;
-            List<T> childList = new List<T>();
+public static List<T> GetChildObjects<T>(DependencyObject obj, Type typename) where T : FrameworkElement
+{
+	DependencyObject child = null;
+	List<T> childList = new List<T>();
 
-            for (int i = 0; i <= VisualTreeHelper.GetChildrenCount(obj) - 1; i++)
-            {
-                child = VisualTreeHelper.GetChild(obj, i);
+	for (int i = 0; i <= VisualTreeHelper.GetChildrenCount(obj) - 1; i++)
+	{
+		child = VisualTreeHelper.GetChild(obj, i);
 
-                if (child is T && (((T)child).GetType() == typename))
-                {
-                    childList.Add((T)child);
-                }
-                childList.AddRange(GetChildObjects<T>(child, typename));
-            }
-            return childList;
-        }
-
-        public static List<T> GetLogicChildObjects<T>(DependencyObject obj, Type typename) where T : FrameworkElement
-        {
-            List<T> childList = new List<T>();
-            foreach (var child in LogicalTreeHelper.GetChildren(obj))
-            {
-                if (child is DependencyObject)
-                {
-                    if (child is T && (((T)child).GetType() == typename))
-                    {
-                        childList.Add((T)child);
-                    }
-                    childList.AddRange(GetLogicChildObjects<T>(child as DependencyObject, typename));
-                }
-            }
-
-            return childList;
+		if (child is T && (((T)child).GetType() == typename))
+		{
+			childList.Add((T)child);
+		}
+		childList.AddRange(GetChildObjects<T>(child, typename));
+	}
+	return childList;
 }
+
+public static List<T> GetLogicChildObjects<T>(DependencyObject obj, Type typename) where T : FrameworkElement
+{
+	List<T> childList = new List<T>();
+	foreach (var child in LogicalTreeHelper.GetChildren(obj))
+	{
+		if (child is DependencyObject)
+		{
+			if (child is T && (((T)child).GetType() == typename))
+			{
+				childList.Add((T)child);
+			}
+			childList.AddRange(GetLogicChildObjects<T>(child as DependencyObject, typename));
+		}
+	}
+
+	return childList;
+}
+
+
+public static List<T> FindVisualChild<T>(DependencyObject obj, Func<T, bool> where = null) where T : DependencyObject
+{
+	List<T> childList = new List<T>();
+	int n = VisualTreeHelper.GetChildrenCount(obj);
+	for (int i = 0; i < n; i++)
+	{
+		DependencyObject child = VisualTreeHelper.GetChild(obj, i);
+		if (child is DependencyObject dChild)
+		{
+			if (child is T tChild && (where == null || where?.Invoke(tChild) == true))
+			{
+				childList.Add(tChild);
+			}
+			childList.AddRange(FindVisualChild<T>(dChild, where));
+		}
+	}
+	return childList;
+}
+
 ```
 
 ```c#
@@ -2157,6 +2231,77 @@ public class CourseDataTemplateSelector : DataTemplateSelector
 }
 ```
 
+Keys: ItemsControl.Template、ItemsControl.ItemsPanel、ItemsControl.ItemTemplate、ItemsControl.ItemContainerStyle
+
+```xaml
+<ItemsControl Margin="10"
+              ItemsSource="{Binding Source={StaticResource myTodoList}}">
+  <!--The ItemsControl has no default visual appearance.
+      Use the Template property to specify a ControlTemplate to define
+      the appearance of an ItemsControl. The ItemsPresenter uses the specified
+      ItemsPanelTemplate (see below) to layout the items. If an
+      ItemsPanelTemplate is not specified, the default is used. (For ItemsControl,
+      the default is an ItemsPanelTemplate that specifies a StackPanel.-->
+  <ItemsControl.Template>
+    <ControlTemplate TargetType="ItemsControl">
+      <Border BorderBrush="Aqua" BorderThickness="1" CornerRadius="15">
+        <ItemsPresenter/>
+      </Border>
+    </ControlTemplate>
+  </ItemsControl.Template>
+  <!--Use the ItemsPanel property to specify an ItemsPanelTemplate
+      that defines the panel that is used to hold the generated items.
+      In other words, use this property if you want to affect
+      how the items are laid out.-->
+  <ItemsControl.ItemsPanel>
+    <ItemsPanelTemplate>
+      <WrapPanel />
+    </ItemsPanelTemplate>
+  </ItemsControl.ItemsPanel>
+  <!--Use the ItemTemplate to set a DataTemplate to define
+      the visualization of the data objects. This DataTemplate
+      specifies that each data object appears with the Priority
+      and TaskName on top of a silver ellipse.-->
+  <ItemsControl.ItemTemplate>
+    <DataTemplate>
+      <DataTemplate.Resources>
+        <Style TargetType="TextBlock">
+          <Setter Property="FontSize" Value="18"/>
+          <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+      </DataTemplate.Resources>
+      <Grid>
+        <Ellipse Fill="Silver"/>
+        <StackPanel>
+          <TextBlock Margin="3,3,3,0"
+                     Text="{Binding Path=Priority}"/>
+          <TextBlock Margin="3,0,3,7"
+                     Text="{Binding Path=TaskName}"/>
+        </StackPanel>
+      </Grid>
+    </DataTemplate>
+  </ItemsControl.ItemTemplate>
+  <!--Use the ItemContainerStyle property to specify the appearance
+      of the element that contains the data. This ItemContainerStyle
+      gives each item container a margin and a width. There is also
+      a trigger that sets a tooltip that shows the description of
+      the data object when the mouse hovers over the item container.-->
+  <ItemsControl.ItemContainerStyle>
+    <Style>
+      <Setter Property="Control.Width" Value="100"/>
+      <Setter Property="Control.Margin" Value="5"/>
+      <Style.Triggers>
+        <Trigger Property="Control.IsMouseOver" Value="True">
+          <Setter Property="Control.ToolTip"
+                  Value="{Binding RelativeSource={x:Static RelativeSource.Self},
+                          Path=Content.Description}"/>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </ItemsControl.ItemContainerStyle>
+</ItemsControl>
+```
+
 
 
 
@@ -2769,7 +2914,7 @@ Keys：CacheMode
 >             ResizeBorderThickness="0"
 >             UseAeroCaptionButtons="False" />
 >     </WindowChrome.WindowChrome>
->   
+> 
 >     <Window.DataContext>
 >         <vm:LoginViewModel x:Name="VM" />
 >     </Window.DataContext>
@@ -2788,6 +2933,62 @@ Keys：CacheMode
 > 		</Border>
 > 	</Grid>
 > </Window>
+> ```
+>
+> 26.以画刷的方式 填充背景 ImageBrush
+>
+> ```xaml
+> <Rectangle
+> 	Width="28"
+> 	Height="28"
+> 	HorizontalAlignment="Center"
+> 	VerticalAlignment="Center"
+> 	RadiusX="10"
+> 	RadiusY="10">
+> 	<Rectangle.Fill>
+> 		<ImageBrush ImageSource="/assets/user1.jpg" Stretch="UniformToFill" />
+> 	</Rectangle.Fill>
+> </Rectangle>
+> ```
+>
+> 27.不重写 Button Style 的情况下，更改 Button Style
+>
+> ```xaml
+> <Button
+> 	Background="#FFF7542E"
+> 	BorderThickness="0"
+> 	Content="Search"
+> 	FontSize="10"
+> 	Foreground="White">
+> 	<Button.Resources>
+> 		<!--  to make border corner round  -->
+> 		<Style TargetType="{x:Type Border}">
+> 			<Setter Property="CornerRadius" Value="10" />
+> 		</Style>
+> 	</Button.Resources>
+> </Button>
+> ```
+>
+> 28.文字背景 形状
+>
+> ```xaml
+> <Grid
+> 	Width="85"
+> 	Height="31">
+> 	<Rectangle
+> 		HorizontalAlignment="Stretch"
+> 		VerticalAlignment="Stretch"
+> 		Fill="White"
+> 		RadiusX="8"
+> 		RadiusY="8" />
+> 	<TextBlock
+> 		HorizontalAlignment="Center"
+> 		VerticalAlignment="Center"
+> 		FontSize="10"
+> 		FontWeight="SemiBold"
+> 		Foreground="#FFF7542E"
+> 		Text="Learn More" />
+> </Grid>
 > ```
 >
 > 

@@ -1,4 +1,4 @@
-## ASP.Net Core
+## Asp.Net Core
 
 ### Data Controller-View
 
@@ -460,6 +460,26 @@ Keys: Keyed、ResolveKeyed
 }
 ```
 
+Keys: AOP
+
+```c#
+// NutGet: Autofac、Castle.Core、Autofac.Extras.DynamicProx
+//2.扩展一个IInterceptor 实现方法
+//3.注册对象和具体之间的关系的时候，需要执行要支持AOP扩展EnableClassInterceptors
+//4.把要扩展aop的方法定义为  virtual 方法
+//5.把扩展的IInterceptor 也要注册到容器中去
+
+
+//一、通过EnableClassInterceptors 来支持的时候
+//1.需要把 Intercept标记到具体的而实现类上--扩展IInterceptor也要引用进来
+//2.特点：必须要是虚方法才会进入到  扩展IInterceptor 来---才能支持aop扩展
+
+
+//二、通过EnableInterfaceInterceptors来支持的时候
+//1.需要把 Intercept标记到抽象--接口--扩展IInterceptor也要引用到抽象这
+//2.特点：只要是实现了这接口，无论是否是虚方法，都可以进入到IInterceptor 中来，也就是都可以支持AOP扩展
+```
+
 
 
 
@@ -646,6 +666,20 @@ Net Core IIS下无Log4Net日志输出，命令行下却有（dotnet运行）：
 https://www.cnblogs.com/liushen/p/Findout_Why_IIS_Has_Not_Log_But_Console_Has.html
 ```
 
+### Deploy IIS
+
+```
+way1: 直接通过文件夹 发布
+
+way2: 使用 WebDeploy，并 通过 VS 实现无差异化发布
+启用 IIS 管理服务
+Web Platform Installer
+Web Deploy 3.6
+
+发布 Web 服务器(IIS)
+Web 部署
+```
+
 
 
 
@@ -659,7 +693,10 @@ https://www.cnblogs.com/liushen/p/Findout_Why_IIS_Has_Not_Log_But_Console_Has.ht
 + 解决跨域问题
 
 ```c#
-// 1.通过添加 Header 
+跨域问题其实是浏览器所限定的； 
+同源策略 是由NetScape提出的一个著名的安全策略。所谓的同源，指的是协议，域名， 端口相同。浏览器处于安全方面的考虑，只允许本域名下的接口交互，不同源的客户端脚 本，在没有明确授权的情况下，浏览器认为这个资源不安全，不能用。
+
+// way 1.通过添加 Header 
 HttpContext.Response.Headers.Add("Access-Control-Allow-Origin", "*"); 
 public class CustomCorsActionFilterAttribute : Attribute, IActionFilter
 {
@@ -675,7 +712,7 @@ public class CustomCorsActionFilterAttribute : Attribute, IActionFilter
 	}
 }
 
-// 2.通过添加 Cores
+// way 2.通过添加 Cores
 builder.Services.AddCors(policy =>
 {
     policy.AddPolicy("CorsPolicy", opt => opt
