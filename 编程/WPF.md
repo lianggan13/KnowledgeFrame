@@ -1938,6 +1938,49 @@ namespace CustomDashboard.Asserts.Style
 
 ```
 
+### Navigate
+
+Keys: Frame
+
+```c#
+pageFrame.Navigate(new System.Uri("Page1.xaml",UriKind.RelativeOrAbsolute));  
+pageFrame.Source = new Uri(radioButton.CommandParameter.ToString(), UriKind.Relative);
+(sender as Frame).NavigationService.RemoveBackEntry();
+```
+Keys: NavigationWindow
+
+```xaml
+Navigate 
+//  Navigate(text2);  Navigate(button2);
+// 	Navigate(new Uri("http://sellsbrothers.com"));
+
+NavigationService navService =
+  NavigationService.GetNavigationService((DependencyObject)sender);
+navService.GoBack();
+
+```
+
+Keys: page#ctrlname
+
+```xaml
+<Hyperlink NavigateUri="Page2.xaml#topic1">Topic 1</Hyperlink>
+<TextBlock Name="topic1">
+	<TextBlock>Topic 1</TextBlock>
+	<TextBlock>...</TextBlock>
+</TextBlock>
+```
+
+Keys: PageFunction<T> 
+
+```xaml
+KeepAlive
+OnReturn(ReturnEventArgs<T> e)
+```
+
+Keys: 
+
+```xaml
+```
 
 
 ### TextBlock
