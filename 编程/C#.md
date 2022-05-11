@@ -83,105 +83,28 @@ var offset = ((Vector)pi.GetValue(sender)).X;
 
 
 
+#### Communication
 
-
-#### 通信
-
-Keys: MQTT
+Keys: MQTT、WebSocket、SignalR
 
 ```c#
-static void InitMqttServer()
-{
-	mqttServer = new MQTTnet.MqttFactory().CreateMqttServer();
-	mqttServer.ApplicationMessageReceivedHandler = new MqttApplicationMessageReceivedHandlerDelegate(ReceiveMessage);
-	mqttServer.ClientConnectedHandler = new MqttServerClientConnectedHandlerDelegate(new Action<MqttServerClientConnectedEventArgs>(ClientConnected));
+MQTT 与 WebSocket 的联系与区别 是什么？
 
-	// 地址  
-	// 安全：用户名/密码
-	MqttServerOptionsBuilder builder = new MqttServerOptionsBuilder();
-	// 指定IP
-	builder.WithDefaultEndpointBoundIPAddress(IPAddress.Parse("127.0.0.1"));
-	builder.WithEncryptedEndpointPort(1883);// 端口号必须是1883，否则客户端连接不上
-	builder.WithConnectionValidator(ConnectionValidator);
-	IMqttServerOptions options = builder.Build();
+构建于 TCP/IP 协议之上的 应用层传输 协议
+具有可靠性、实时性
+支持双向通信
 
-	mqttServer.StartAsync(options).GetAwaiter().GetResult();
+WebSocket 报文协议简单
+MQTT 拥有复杂的消息投递协议，支持消息 发布--订阅 
 
-}
+WebSocket 应用 Web 开发，浏览器与服务器全双工通信
+MQTT 应用 IoT 场景，用于与各个远端硬件设备之间的通信
 
-static void ConnectionValidator(MqttConnectionValidatorContext context)
-{
-	// 当客户端连接的时候，会触发这个委托 
-	if (context.Username == "zhaoxi" && context.Password == "jovan")
-	{
-		context.ReasonCode = MqttConnectReasonCode.Success;
-	}
-	else
-	{
-		context.ReasonCode = MqttConnectReasonCode.BadUserNameOrPassword;
-	}
-}
-
-static void ReceiveMessage(MqttApplicationMessageReceivedEventArgs e)
-{
-	System.Console.WriteLine("服务端接收到消息：" + e.ApplicationMessage.Payload);
-}
-
-static void ClientConnected(MqttServerClientConnectedEventArgs e)
-{
-	Console.WriteLine("有客户端接入：" + e.ClientId);
-}
-
-static void Connect()
-{
-	mqttClient = new MqttFactory().CreateManagedMqttClient();
-
-	MqttClientOptionsBuilder mqttClientBuilder = new MqttClientOptionsBuilder();
-	mqttClientBuilder.WithClientId(Guid.NewGuid().ToString());
-	mqttClientBuilder.WithTcpServer("127.0.0.1", 1883);// 端口号必须是1883，否则客户端连接不上
-	mqttClientBuilder.WithCredentials("zhaoxi", "jovan");
-	ManagedMqttClientOptionsBuilder builder = new ManagedMqttClientOptionsBuilder();
-	// 指定IP
-	builder.WithClientOptions(mqttClientBuilder);
-	IManagedMqttClientOptions options = builder.Build();
-
-	mqttClient.StartAsync(options).GetAwaiter().GetResult();
-}
+SignalR 是什么？
+.Net 实时 Web 应用开发开源库
+集成了数种常见的消息传输方式，如long polling，WebSocket
+用于快速构建需要实时进行用户交互和数据更新的 Web 应用，如 股票、天气、硬件设备信息更新
 ```
-
-Keys: WebSocket
-
-```c#
-ServerConfig serverConfig = new ServerConfig();
-serverConfig.Ip = "127.0.0.1";
-serverConfig.Port = 9090;
-
-if (!webSocketServer.Setup(serverConfig))
-{
-	Console.WriteLine("配置信息设置异常");
-	return;
-}
-
-if (!webSocketServer.Start())
-{
-	Console.WriteLine("开启服务器失败！");
-	return;
-}
-
-Console.WriteLine("WebSocket服务正在监听....");
-
-webSocketServer.NewSessionConnected += WebSocketServer_NewSessionConnected;
-webSocketServer.NewMessageReceived += WebSocketServer_NewMessageReceived;
-webSocketServer.SessionClosed += WebSocketServer_SessionClosed;
-
-webSocket = new WebSocket("ws://127.0.0.1:9090");
-webSocket.Open();
-webSocket.Opened += WebSocket_Opened;
-webSocket.Error += WebSocket_Error;
-webSocket.MessageReceived += WebSocket_MessageReceived;
-```
-
-
 
 
 
