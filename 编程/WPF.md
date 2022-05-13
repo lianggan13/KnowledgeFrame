@@ -791,6 +791,54 @@ Keys: EventTrigger
 </Border>
 ```
 
+
+
+### Resource
+
+Keys: SystemColors
+
+```xaml
+this.Background = (Brush) this.FindResource(SystemColors.ControlBrushKey);
+
+<Grid Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"/>
+```
+
+Keys: MergedDictionaries、ResourceDictionary
+
+```c#
+static ResourceDictionary greenSkin;
+static ResourceDictionary blueSkin;
+
+void EnsureSkins()
+{
+	// this method is called each time a new Window1 is constructed,
+	// so make sure we only load the resources the first time
+	greenSkin = new ResourceDictionary();
+	greenSkin.Source = new Uri("GreenSkin.xaml", UriKind.Relative);
+	blueSkin = new ResourceDictionary();
+	blueSkin.Source = new Uri("BlueSkin.xaml", UriKind.Relative);
+}
+
+ void ApplySkin(ResourceDictionary newSkin)
+{
+	Collection<ResourceDictionary> appMergedDictionaries =
+		Application.Current.Resources.MergedDictionaries;
+
+	// remove the old skins (MergedDictionary.Clear won't do the trick)
+	if (appMergedDictionaries.Count != 0)
+	{
+		appMergedDictionaries.Remove(appMergedDictionaries[0]);
+	}
+
+	// add the new skin
+	appMergedDictionaries.Add(newSkin);
+}
+```
+
+
+
+
+
 ### RoutedEvent
 
 Keys: RoutedEventHandler、RoutedEventArgs、EventManager
@@ -2123,11 +2171,13 @@ Keys：DataGridColumnHeader
 Keys：Effect、DropShadowEffect、ShadowDepth、BlurRadius、ImageBrush
 
 ~~~xaml
-// BlurRadius="5"：	模糊程度	
-// Direction="0"：	相对于内容的角度
-// Opacity="0.3"：	透明度
-// ShadowDepth="0"：	与内容的距离，
-// Color="Gray"：	颜色
+<!--
+BlurRadius="5"：	阴影半径范围	
+Direction="0"：	阴影方向
+ShadowDepth="0"：	阴影深度偏移量，
+Opacity="0.3"：	透明度
+Color="Gray"：	颜色	-->
+
 <Border
 	Width="90"
 	Height="80"
