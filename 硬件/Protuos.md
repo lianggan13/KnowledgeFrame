@@ -1,4 +1,4 @@
-### Protuos 元件对照表
+### Protuos
 
 + Proteus的这25大类元器件分别为
 
