@@ -657,6 +657,30 @@ Keys：AllowResample、AnimationAutoStartMode、ArgumentDataMember、CrosshairCo
 
 
 
+### Drawing
+
+#### Shapes
+
+Keys: Ellipse、Path、Rectangle、Line、Polyline、Polygon
+
+
+
+#### Brushes
+
+Keys: SolidColorBrush、LinearGradientBrush、RadialGradientBrush、ImageBrush、DrawingBrush、VisualBrush、
+
+
+
+#### Pen
+
+Keys: Line Thickness、Dash Patterns、Cap Details、
+
+
+
+
+
+
+
 ### Trigger
 
 Description：通过指定属性的变化或者事件的触发时，更改控件的外观和行为，并且并触发器监测的属性必然为依赖属性，事件必然为路由事件
