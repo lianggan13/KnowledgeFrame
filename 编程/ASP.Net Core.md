@@ -1,5 +1,14 @@
 ## Asp.Net Core
 
+### Run
+
+```
+set ASPNETCORE_URLS=http://192l.168.1.102:8081
+dotnet Y.DP.Shen12.Server.dll
+```
+
+
+
 ### Data Controller-View
 
 Keys: ViewBag、ViewData、TempData、Session
