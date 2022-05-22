@@ -657,7 +657,7 @@ Keys：AllowResample、AnimationAutoStartMode、ArgumentDataMember、CrosshairCo
 
 
 
-### Drawing
+### Graphics
 
 #### Shapes
 
@@ -667,7 +667,20 @@ Keys: Ellipse、Path、Rectangle、Line、Polyline、Polygon
 
 #### Brushes
 
-Keys: SolidColorBrush、LinearGradientBrush、RadialGradientBrush、ImageBrush、DrawingBrush、VisualBrush、
+Keys: SolidColorBrush、LinearGradientBrush、RadialGradientBrush、
+
+Keys: ImageBrush、DrawingBrush、VisualBrush、
+
+```
+
+TileBrush
+ImageBrush: bitmap
+DrawingBrush: scalabe drawing 
+VisualBrush: visual element 
+
+```
+
+
 
 
 
