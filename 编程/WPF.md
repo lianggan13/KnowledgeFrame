@@ -1454,7 +1454,7 @@ private static void PropertyChangedCallbackHandler(DependencyObject d, Dependenc
 
 #### AttachedProperty
 
-Keys: DependencyObject(依赖对象)、GetValue、SetValue
+Keys: DependencyObject、GetValue、SetValue
 
 ```c#
 public class ContentTypeDpObj : DependencyObject
@@ -1571,7 +1571,64 @@ namespace GTS.MaxSign.Controls.Assets.Components
 
 ```
 
+Keys: TemplateBinding
 
+```xaml
+<TextBox
+	x:Name="TrainNoBox"
+	Width="62"
+	Height="16"
+	helper:TextBoxHelper.GotFocusedIgnoreBinding="True"
+	helper:WatermarkHelper.Watermark="请输入"
+	helper:WatermarkHelper.WatermarkBrush="#99AFCC"
+	Background="Transparent"
+	BorderThickness="0"
+	CaretBrush="#99AFCC"
+	DataContext="{Binding}"
+	FontSize="10"
+	Foreground="#99AFCC"
+	Style="{StaticResource WatermarkTextBoxStyle}"
+	Text="{Binding Trains[0].No}"
+	TextAlignment="Center" />
+	
+
+<Style x:Key="WatermarkTextBoxStyle" TargetType="{x:Type TextBox}">
+	<Setter Property="VerticalContentAlignment" Value="Center" />
+	<Setter Property="Template">
+		<Setter.Value>
+			<ControlTemplate TargetType="{x:Type TextBox}">
+				<Border
+					Width="{TemplateBinding Width}"
+					Height="{TemplateBinding Height}"
+					Background="{TemplateBinding Background}"
+					BorderBrush="{TemplateBinding BorderBrush}"
+					BorderThickness="{TemplateBinding BorderThickness}"
+					CornerRadius="{TemplateBinding Property=helper:CornerRadiusHelper.CornerRadius}">
+					<Grid Margin="{TemplateBinding Padding}">
+						<TextBlock
+							x:Name="PART_Watermark"
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+							FontSize="{TemplateBinding FontSize}"
+							Foreground="{TemplateBinding Property=helper:WatermarkHelper.WatermarkBrush}"
+							Text="{TemplateBinding Property=helper:WatermarkHelper.Watermark}"
+							Visibility="Collapsed" />
+						<ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+					</Grid>
+				</Border>
+				<ControlTemplate.Triggers>
+					<MultiTrigger>
+						<MultiTrigger.Conditions>
+							<Condition Property="IsFocused" Value="False" />
+							<Condition Property="Text" Value="" />
+						</MultiTrigger.Conditions>
+						<Setter TargetName="PART_Watermark" Property="Visibility" Value="Visible" />
+					</MultiTrigger>
+				</ControlTemplate.Triggers>
+			</ControlTemplate>
+		</Setter.Value>
+	</Setter>
+</Style>
+```
 
 
 
