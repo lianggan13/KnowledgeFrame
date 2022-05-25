@@ -657,7 +657,7 @@ Keys：AllowResample、AnimationAutoStartMode、ArgumentDataMember、CrosshairCo
 
 
 
-### Drawing
+### Graphics
 
 #### Shapes
 
@@ -667,7 +667,20 @@ Keys: Ellipse、Path、Rectangle、Line、Polyline、Polygon
 
 #### Brushes
 
-Keys: SolidColorBrush、LinearGradientBrush、RadialGradientBrush、ImageBrush、DrawingBrush、VisualBrush、
+Keys: SolidColorBrush、LinearGradientBrush、RadialGradientBrush、
+
+Keys: ImageBrush、DrawingBrush、VisualBrush、
+
+```
+
+TileBrush
+ImageBrush: bitmap
+DrawingBrush: scalabe drawing 
+VisualBrush: visual element 
+
+```
+
+
 
 
 
@@ -818,6 +831,41 @@ Keys: EventTrigger
 
 
 ### Resource
+
+Keys: ComponentResourceKey
+
+```xaml
+// Generic.xaml
+<ImageBrush
+	x:Key="{ComponentResourceKey {x:Type local:CustomTheme},
+								 DogBrushKey}"
+	ImageSource="/WPF.Common;component/Assets/Images/dog.png"
+	Opacity="0.3"
+	TileMode="Tile"
+	Viewport="0 0 32 32"
+	ViewportUnits="Absolute" />
+
+// CustomTheme.cs
+public class CustomTheme
+{
+	public static ComponentResourceKey DogBrushKey
+	{
+		get { return new ComponentResourceKey(typeof(CustomTheme), nameof(DogBrushKey)); }
+	}
+}
+
+// MainWindow.xaml
+<Button
+	Margin="5"
+	Padding="5"
+	Background="{DynamicResource {x:Static comt:CustomTheme.DogBrushKey}}"
+	Content="Dog"
+	FontSize="22"
+	FontWeight="Bold"
+	Foreground="Green" />
+```
+
+
 
 Keys: SystemColors
 
