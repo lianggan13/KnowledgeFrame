@@ -1,6 +1,53 @@
 ## WPF
 
-### xmlns
+### Appliction
+
+Keys:Create UI thread
+
+```c#
+// Creates and starts a secondary thread in a single threaded apartment (STA)
+var thread = new Thread(MethodRunningOnSecondaryUIThread);
+thread.SetApartmentState(ApartmentState.STA);
+thread.IsBackground = true;
+thread.Start();
+
+// THIS METHOD RUNS ON A SECONDARY UI THREAD (THREAD WITH A DISPATCHER)
+private void MethodRunningOnSecondaryUIThread()
+{
+	var secondaryUiThreadId = Thread.CurrentThread.ManagedThreadId;
+	try
+	{
+		// On secondary thread, show a new Window before starting a new Dispatcher
+		// ie turn secondary thread into a UI thread
+		var window = new SecondaryUIThreadWindow();
+		window.Show();
+		Dispatcher.Run();
+	}
+	catch (Exception ex)
+	{
+		// Dispatch the exception back to the main ui thread and reraise it
+		Application.Current.Dispatcher.Invoke(
+			DispatcherPriority.Send,
+			(DispatcherOperationCallback)delegate
+		   {
+			   // THIS CODE RUNS BACK ON THE MAIN UI THREAD
+			   string msg = $"Exception forwarded from secondary UI thread {secondaryUiThreadId}.";
+			   throw new Exception(msg, ex);
+		   }
+			, null);
+
+		// NOTE - Application execution will only continue from this point
+		//        onwards if the exception was handled on the main UI thread
+		//        by Application.DispatcherUnhandledException
+	}
+}
+```
+
+
+
+
+
+### Namespace
 
 Keys: xmlns:x、x:Class、InitializeComponent
 
@@ -58,25 +105,21 @@ Keys: XmlnsDefinition
  xmlns:ctls="http://www.yd-tec.com/winfx/xaml/shared"
 ```
 
+### StringFormat
+
+```
+{0:#,#.0}
+{0:dddd, MMMM dd}
+{0:HH:mm}
+```
+
 
 
 ### Animation
 
-Keys：BeginStoryboard、Storyboard、Storyboard.TargetName、Storyboard.TargetProperty、Duration、To、By
-
-> + LinearAnimation
-> + KeyFrameAnimation
-> + PathAnimation
+Keys: Animation、KeyFrames、KeyTime
 
 ```xaml
-Storyboard
-	AutoReverse="True"
-	RepeatBehavior="Forever"
-	Storyboard.TargetName="[Element.Name]"
-	Storyboard.TargetProperty="[Element.Property]"
-	To="[Color]" To="[double]"
-	Duration="[TimeLine]" />
-
 LinearAnimation
 	ColorAnimation
 	PointAnimation
@@ -88,14 +131,54 @@ KeyFrameAnimation
 		<LinearDoubleKeyFrame KeyTime="0:0:0" Value="180" />
 		<DiscreteDoubleKeyFrame  KeyTime="0:0:0.5" Value="180"/>
 		<SplineDoubleKeyFrame  KeySpline="1,0 0.5,1" KeyTime="0:0:1" Value="200" />
+	
 	ColorAnimationUsingKeyFrames
-		<DiscreteColorKeyFrame KeyTime="0:0:0.5" Value="Red" />
-		<DiscreteColorKeyFrame KeyTime="0:0:1" Value="Orange" />
+		LinearColorKeyFrame
+		DiscreteColorKeyFrame
+		SplineColorKeyFrame
+	
+	ThicknessAnimationUsingKeyFrames
+		LinearThicknessKeyFrame
+		DiscreteThicknessKeyFrame
+		SplineThicknessKeyFrame
+	
+	PointAnimationUsingKeyFrames
+		LinearPointKeyFrame
+		DiscretePointKeyFrame
+		SplinePointKeyFrame
+	
+	BooleanAnimationUsingKeyFrames
+		DiscreteBooleanKeyFrame
+
+	StringAnimationUsingKeyFrames
+		DiscreteStringKeyFrame
+
+	RectAnimationUsingKeyFrames
+		LinearRectKeyFrame
+		DiscreteRectKeyFrame
+		SplineRectKeyFrame
+		
+	KeyTime
+		"0:0:3"
+		"30%"
+		"Uniform" 	// 时间线平均分布每个关键帧所需要的时间
+		"Paced"		// 间线按固定的帧率分配所需时间，这种情况下，变化大的关键帧分配时间长，变化小的关键帧分配时间段
 
 PathAnimation
 	PointAnimationUsingPath
 	DoubleAnimationUsingPath
+```
 
+Keys：BeginStoryboard、Storyboard、Storyboard.TargetName、Storyboard.TargetProperty、Duration、To、By
+
+```xaml
+Storyboard
+	AutoReverse="True"
+	RepeatBehavior="Forever"
+	Storyboard.TargetName="[Element.Name]"
+	Storyboard.TargetProperty="[Element.Property]"
+	To="[Color]" To="[double]"
+	Duration="[TimeLine]" />
 
 // RadioButton --> RoutEvent:Check、UnCheck --> EventTrigger --> BeginStoryboard --> Storyboard --> DoubleAnimation --> Border
 
@@ -128,6 +211,102 @@ PathAnimation
 </Border>
 ```
 
+Keys:Event Trigger、Property Trigger、DataTrigger
+
+```xaml
+<ControlTemplate.Triggers>
+
+	<!--  Event Trigger Example  -->
+	<EventTrigger RoutedEvent="Border.MouseEnter" SourceName="innerBorder">
+		<BeginStoryboard>
+			<Storyboard>
+				<ColorAnimation
+					AutoReverse="True"
+					Storyboard.TargetName="innerBorderBackgroundBrush"
+					Storyboard.TargetProperty="Color"
+					From="White"
+					To="#CCCCFF"
+					Duration="0:0:3" />
+			</Storyboard>
+		</BeginStoryboard>
+	</EventTrigger>
+
+	<!--  Property Trigger Example  -->
+	<Trigger SourceName="contentPanel" Property="IsMouseOver" Value="True">
+		<Trigger.EnterActions>
+			<BeginStoryboard>
+				<Storyboard>
+					<ColorAnimation
+						Storyboard.TargetName="contentPanelBrush"
+						Storyboard.TargetProperty="Color"
+						To="Purple"
+						Duration="0:0:1" />
+				</Storyboard>
+			</BeginStoryboard>
+		</Trigger.EnterActions>
+		<Trigger.ExitActions>
+			<BeginStoryboard>
+				<Storyboard>
+					<ColorAnimation
+						Storyboard.TargetName="contentPanelBrush"
+						Storyboard.TargetProperty="Color"
+						To="White"
+						Duration="0:0:1" />
+				</Storyboard>
+			</BeginStoryboard>
+		</Trigger.ExitActions>
+	</Trigger>
+</ControlTemplate.Triggers>
+
+<Style.Triggers>
+	<EventTrigger RoutedEvent="Button.MouseEnter">
+	  <EventTrigger.Actions>
+		<BeginStoryboard>
+		  <Storyboard>
+			<DoubleAnimation
+			  Storyboard.TargetProperty="(Button.Opacity)"
+			  From="1.0" To="0.5" Duration="0:0:0.5" AutoReverse="True"
+			  RepeatBehavior="Forever" />
+		  </Storyboard>
+		</BeginStoryboard>
+	  </EventTrigger.Actions>
+	</EventTrigger>  
+	
+	<EventTrigger RoutedEvent="Button.MouseLeave">
+	  <EventTrigger.Actions>
+		<BeginStoryboard>
+		  <Storyboard>
+			<DoubleAnimation
+			  Storyboard.TargetProperty="(Button.Opacity)"
+			  To="1" Duration="0:0:0.1" />
+		  </Storyboard>
+		</BeginStoryboard>
+	  </EventTrigger.Actions>
+	</EventTrigger>   
+	
+	<EventTrigger RoutedEvent="Button.Click">
+	  <EventTrigger.Actions>
+		<BeginStoryboard>
+		  <Storyboard>
+			<ColorAnimation 
+			  Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)"
+			  From="Orange" To="White" Duration="0:0:0.1" AutoReverse="True" />
+		  </Storyboard>
+		</BeginStoryboard>
+	  </EventTrigger.Actions>
+	</EventTrigger>  
+  </Style.Triggers>
+```
+
+Keys: Render
+
+
+```c#
+CompositionTarget.Rendering += UpdateColor;
+```
+
+
+
 ### MVVM Foundation
 
 ![](Images\mvvm_foundation_frame.PNG)
@@ -143,9 +322,9 @@ PathAnimation
 
 > Bind Mode
 >
-> ​	One Way:            UI <---- Model (UI Get)
+> ​	One Way:            UI <---- Model (UI Get)   Convert
 >
-> ​	One Way to Source:   UI ----> Model (UI Set)
+> ​	One Way to Source:   UI ----> Model (UI Set)  ConvertBack
 >
 > ​	Two Way:    UI <---> Model (UI Get & Set)
 >
@@ -1818,6 +1997,15 @@ LinearGradientBrush
 	EndPoint (x,y)	Default:(1,1)
 ~~~
 
+```c#
+Brushes
+	DrawingBrush	|
+	ImageBrush      | --> Brush -- Rectangle.Fill
+	VisualBrush     |
+	
+DrawingImage --> ImageSource -- Image.Source
+```
+
 
 
 ### Window
@@ -2909,6 +3097,22 @@ Keys: Capture
 ```xaml
 将鼠标捕获到特定元素
 若要释放鼠标捕获，则调用 Capture null 作为要捕获的元素传递，即 Capture(null)
+
+private void Calendar_PreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+{
+	// release mouse capture (don't need focuse)
+	// way1
+	if (Mouse.Captured is CalendarItem)
+	{
+		Mouse.Capture(null);
+	}
+	return;
+	// way2
+	if (sender is UIElement ui)
+	{
+		ui.ReleaseMouseCapture();
+	}
+}
 ```
 
 Keys: DirectlyOver
@@ -3212,6 +3416,8 @@ Keys：CacheMode
 > 		Text="Learn More" />
 > </Grid>
 > ```
+>
+> 
 >
 > 
 
