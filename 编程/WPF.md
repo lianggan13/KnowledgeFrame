@@ -530,6 +530,42 @@ Keys: Convert、ConvertBack
 //当值从绑定目标传播给绑定源时，调用此方法ConvertBack
 ```
 
+### MarkupExtension
+
+Keys: FontUriExtension
+
+```c#
+ public class FontUriExtension : MarkupExtension
+ {
+     string fontFamilyName;
+
+     public FontUriExtension(string fontFamilyName)
+     {
+         this.fontFamilyName = fontFamilyName;
+     }
+
+     public override object ProvideValue(IServiceProvider serviceProvider)
+     {
+         Typeface tf = new Typeface(this.fontFamilyName);
+         GlyphTypeface gtf = null;
+         if (!tf.TryGetGlyphTypeface(out gtf))
+         {
+             throw new ArgumentException("Font family not found");
+         }
+         return gtf.FontUri;
+     }
+ }
+
+<Glyphs FontUri="{loc:FontUri Calibri}"  FontRenderingEmSize="40"
+              UnicodeString="Hello, world" Fill="Black" OriginY="30" />
+```
+
+
+
+
+
+
+
 ### Behavior
 
 Keys: i:Interaction.Behaviors
