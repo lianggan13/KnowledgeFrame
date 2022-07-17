@@ -43,10 +43,6 @@ private void MethodRunningOnSecondaryUIThread()
 }
 ```
 
-
-
-
-
 ### Namespace
 
 Keys: xmlns:x、x:Class、InitializeComponent
@@ -340,8 +336,6 @@ Keys: UpdateSourceTrigger、LostFocus、PropertyChanged、Explicit
 | PropertyChanged     | 键入 TextBox 时          | 聊天室窗口中的 TextBox 控件  |
 | Explicit            | 应用调用 UpdateSource 时 | 用户按“提交”按钮时才更新源值 |
 
-
-
 Keys: Global Static Resource
 
 ```xaml
@@ -522,12 +516,210 @@ Keys: DxEvent
 </ContextMenu>
 ```
 
-Keys: Convert、ConvertBack
+
+
+### Convert
+
+Keys: IValueConverter、Convert、ConvertBack
 
 ```cs
 //当值从绑定源传播给绑定目标时，调用方法Convert
 
 //当值从绑定目标传播给绑定源时，调用此方法ConvertBack
+```
+
+Keys: TypeConverter
+
+```c#
+[TypeConverter(typeof(LengthConverter))]
+public double Width { get; set; }
+[TypeConverter(typeof(LengthConverter))]
+public double Height { get; set; }
+```
+
+### Markup Extension
+
+Keys: x:Null
+
+```xaml
+<Button Background="{x:Null}">Click</Button>
+```
+
+```c#
+Button b = new Button();
+b.Background = null;
+b.Content = "Click";
+```
+
+Keys: x:Array
+
+```xaml
+<Grid>
+  <Grid.Resources>
+    <x:ArrayExtension Type="{x:Type Brush}" x:Key="brushes">
+      <SolidColorBrush Color="Blue" />
+      <LinearGradientBrush StartPoint="0,0" EndPoint="0.8,1.5">
+        <LinearGradientBrush.GradientStops>
+          <GradientStop Color="Green" Offset="0" />
+          <GradientStop Color="Cyan" Offset="1" />
+        </LinearGradientBrush.GradientStops>
+      </LinearGradientBrush>
+      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+        <LinearGradientBrush.GradientStops>
+          <GradientStop Color="Black" Offset="0" />
+          <GradientStop Color="Red" Offset="1" />
+        </LinearGradientBrush.GradientStops>
+      </LinearGradientBrush>
+    </x:ArrayExtension>
+  </Grid.Resources>
+
+  <ListBox ItemsSource="{StaticResource brushes}" Name="myListBox">
+    <ListBox.ItemTemplate>
+      <DataTemplate>
+        <Rectangle Fill="{Binding}" Width="100" Height="40" Margin="2" />
+      </DataTemplate>
+    </ListBox.ItemTemplate>
+  </ListBox>
+</Grid>
+```
+
+```c#
+Brush[] brushes = new Brush[3];
+SolidColorBrush scb = new new SolidColorBrush();
+scb.Color = Colors.Blue;
+brushes[0] = scb;
+
+LinearGradientBrush lgb = new LinearGradientBrush();
+lgb.StartPoint = new Point(0,0);
+lgb.EndPoint = new Point(0.8, 1.5);
+GradientStop gs = new GradientStop();
+gs.Offset = 0;
+gs.Color = Colors.Green;
+lgb.GradientStops.Add(gs);
+gs = new GradientStop();
+gs.Offset = 1;
+gs.Color = Colors.Cyan;
+lgb.GradientStops.Add(gs);
+brushes[1] = lgb;
+
+lgb = new LinearGradientBrush();
+lgb.StartPoint = new Point(0,0);
+lgb.EndPoint = new Point(0, 1);
+gs = new GradientStop();
+gs.Offset = 0;
+gs.Color = Colors.Black;
+lgb.GradientStops.Add(gs);
+gs = new GradientStop();
+gs.Offset = 1;
+gs.Color = Colors.Red;
+lgb.GradientStops.Add(gs);
+brushes[2] = lgb;
+
+myGrid.Resources["brushes"] = brushes;
+...
+myListBox.ItemsSource = myListBox.Resources["brushes"];
+```
+
+Keys: x:Static
+
+```xaml
+<TextBlock Background="{x:Static SystemColors.ActiveCaptionBrush}" Text="Foo" />
+```
+
+```c#
+TextBlock tb = new TextBlock();
+tb.Background = SystemColors.ActiveCaptionBrush;
+tb.Text = "Foo";
+```
+
+Keys: StaticResource
+
+```xaml
+<Grid>
+  <Grid.Resources>
+    <SolidColorBrush x:Key="fooBrush" Color="Yellow" />
+  </Grid.Resources>
+
+  <Button Background="{StaticResource fooBrush}" Name="myButton" />
+</Grid>
+
+<TextBlock Name="myText"
+    Background="{StaticResource
+        {x:Static SystemColors.ActiveCaptionBrushKey}}" />
+```
+
+```c#
+myButton.Background = (Brush)myButton.FindResource("fooBrush");
+
+myText.Background = (Brush)myButton.FindResource(SystemColors.ActiveCaptionBrushKey);
+```
+
+Keys: DynamicResource
+
+```xaml
+<TextBlock Name="myText"
+    Background="{DynamicResource
+        {x:Static SystemColors.ActiveCaptionBrushKey}}" />
+```
+
+```c#
+myText.SetResourceReference(TextBlock.BackgroundProperty),
+	SystemColors.ActiveCaptionBrushKey);
+```
+
+Keys: ComponentResourceKey
+
+```xaml
+<ResourceDictionary
+  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+  xmlns:local="clr-namespace:MyComponent">
+
+  <SolidColorBrush x:Key="{ComponentResourceKey {x:Type loc:MyType}, brush1}"
+                   Color="Red" />
+  <SolidColorBrush x:Key="{ComponentResourceKey {x:Type loc:MyType}, brush2}"
+                   Color="Green" />
+
+</ResourceDictionary>
+
+<TextBlock Background="{DynamicResource
+              {ComponentResourceKey {x:Type loc:MyType}, brush1}}" />
+
+```
+
+```c#
+ResourceDictionary rd = new ResourceDictionary();
+rd.Add(new ComponentResourceKey(typeof(MyType), "brush1"),
+       new SolidColorBrush(Colors.Red));
+rd.Add(new ComponentResourceKey(typeof(MyType), "brush2"),
+       new SolidColorBrush(Colors.Green));
+
+TextBlock myText = new TextBlock();
+myText.SetResourceReference(TextBlock.Background,
+    new ComponentResourceKey(typeof(MyType), "brush1"));
+```
+
+Keys: X:Type
+
+```xaml
+<TextBlock Background="{x:Static SystemColors.ActiveCaptionBrush}" Text="Foo" />
+```
+
+```c#
+TextBlock tb = new TextBlock();
+tb.Background = SystemColors.ActiveCaptionBrush;
+tb.Text = "Foo";
+```
+
+Keys: X:Type
+
+```xaml
+<TextBlock Background="{x:Static SystemColors.ActiveCaptionBrush}" Text="Foo" />
+```
+
+```c#
+TextBlock tb = new TextBlock();
+tb.Background = SystemColors.ActiveCaptionBrush;
+tb.Text = "Foo";
 ```
 
 ### Behavior
