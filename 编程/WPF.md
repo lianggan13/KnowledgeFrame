@@ -1975,7 +1975,7 @@ DashStyle:奇数位，宽度；偶数位，间距
 
 Data=”A 100,100 0 1 1 300,299 Z”
 A:		Arc 圆弧
-100,100:圆弧宽高，圆是两值相同；(仅由此自动决定 圆的半径长度)
+100,100:相当于 RadiusX,RadiusY，X轴半径，Y轴半径(当两者相同时，自然为⚪)
 0:		旋转角度；
 1:		1 取大圆弧，0 取小圆弧；(当图形设置了旋转角度，并且大于 180度时，才会生效)
 1:		1 顺时针画弧，0 逆时针画弧；(根据 起始坐标和终止坐标 两点画圆)；
@@ -3431,30 +3431,18 @@ Keys：CacheMode
 > </Button>
 > ```
 >
-> 28.文字背景 形状
+> 28.相对父容器位置偏移量
 >
-> ```xaml
-> <Grid
-> 	Width="85"
-> 	Height="31">
-> 	<Rectangle
-> 		HorizontalAlignment="Stretch"
-> 		VerticalAlignment="Stretch"
-> 		Fill="White"
-> 		RadiusX="8"
-> 		RadiusY="8" />
-> 	<TextBlock
-> 		HorizontalAlignment="Center"
-> 		VerticalAlignment="Center"
-> 		FontSize="10"
-> 		FontWeight="SemiBold"
-> 		Foreground="#FFF7542E"
-> 		Text="Learn More" />
-> </Grid>
+> ```c#
+>  Point offset = child.TransformToVisual(parent).Transform(new Point());
 > ```
->
 > 
->
+> 
+> 
+> 
+> 
+> 
+> 
 > 
 
 
