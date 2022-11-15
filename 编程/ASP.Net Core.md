@@ -2,9 +2,17 @@
 
 ### Run
 
-```
+```c#
 set ASPNETCORE_URLS=http://192l.168.1.102:8081
 dotnet Y.DP.Shen12.Server.dll
+    
+dotnet run --urls="http://*:5177"
+
+dotnet run --urls="http://*:5726" --ip=127.0.0.1 --port=5726 --weight=1
+dotnet run --urls="http://*:5727" --ip=127.0.0.1 --port=5727 --weight=2
+dotnet run --urls="http://*:5728" --ip=127.0.0.1 --port=5728 --weight=10
+dotnet run --urls="http://*:5729" --ip=127.0.0.1 --port=5729 --weight=15
+
 ```
 
 
