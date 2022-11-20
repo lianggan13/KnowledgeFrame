@@ -61,11 +61,183 @@ var offset = ((Vector)pi.GetValue(sender)).X;
 
 
 
+### Concurrency
+
+#### Thread Safe
+
+1. [**ConcurrentDictionary< Key, Value>**](https://dotnettutorials.net/lesson/concurrentdictionary-collection-class-in-csharp/): Thread-safe version of Generic Dictionary.
+2. [**ConcurrentQueue**](https://dotnettutorials.net/lesson/concurrentqueue-collection-class-in-csharp/): Thread-safe version of the generic queue (FIFO Data Structure).
+3. [**ConcurrentStact**](https://dotnettutorials.net/lesson/concurrentstack-collection-class-csharp/): Thread-safe version of generic stack (LIFO Data Structure).
+4. [**ConcurrentBag**](https://dotnettutorials.net/lesson/concurrentbag-collection-class-in-csharp/): Thread-safe implementation of an unordered collection.
+5. [**BlockingCollection**](https://dotnettutorials.net/lesson/blockingcollection-class-in-csharp/): Provides a Classical Producer-Consumer pattern.
 
 
-#### 线程
 
-线程安全？
+#### Parallel
+
+```c#
+var sw = Stopwatch.StartNew()
+sw.Restart();
+sw.Stop();
+
+Console.WriteLine($"Serial  :\t{result}\t{sw.Elapsed}");
+Console.WriteLine($"{function.PadRight(22)} | {sw.Elapsed} | {pi}");
+
+static double ParallelLinqPi()
+{
+	double step = 1.0 / (double)NumberOfSteps;
+	return (from i in ParallelEnumerable.Range(0, NumberOfSteps)
+			let x = (i + 0.5) * step
+			select 4.0 / (1.0 + x * x)).Sum() * step;
+}
+
+static double ParallelPi()
+{
+	double sum = 0.0;
+	double step = 1.0 / (double)NumberOfSteps;
+	object monitor = new object();
+	Parallel.For(0, NumberOfSteps, () => 0.0, (i, state, local) =>
+	{
+		//state.Break
+		double x = (i + 0.5) * step;
+		return local + 4.0 / (1.0 + x * x);
+	}, local =>
+	{
+		lock (monitor)
+			sum += local;
+	});
+	return step * sum;
+}
+
+static double ParallelPartitionerPi()
+{
+	double sum = 0.0;
+	double step = 1.0 / (double)NumberOfSteps;
+	object monitor = new object();
+	Parallel.ForEach(Partitioner.Create(0, NumberOfSteps), () => 0.0, (range, state, local) =>
+	{
+		for (int i = range.Item1; i < range.Item2; i++)
+		{
+			double x = (i + 0.5) * step;
+			local += 4.0 / (1.0 + x * x);
+		}
+		return local;
+	}, local => { lock (monitor) sum += local; });
+	return step * sum;
+}
+
+
+private static int ParallelEditDistance(string s1, string s2)
+{
+	int[,] dist = new int[s1.Length + 1, s2.Length + 1];
+	for (int i = 0; i <= s1.Length; i++) dist[i, 0] = i;
+	for (int j = 0; j <= s2.Length; j++) dist[0, j] = j;
+	int numBlocks = Environment.ProcessorCount * 4;
+
+	ParallelAlgorithms.Wavefront(
+		s1.Length, s2.Length,
+		numBlocks, numBlocks,
+		(start_i, end_i, start_j, end_j) =>
+	{
+		for (int i = start_i + 1; i <= end_i; i++)
+		{
+			for (int j = start_j + 1; j <= end_j; j++)
+			{
+				dist[i, j] = (s1[i - 1] == s2[j - 1]) ?
+					dist[i - 1, j - 1] :
+					1 + Math.Min(dist[i - 1, j],
+						Math.Min(dist[i, j - 1],
+								 dist[i - 1, j - 1]));
+			}
+		}
+	});
+
+	return dist[s1.Length, s2.Length];
+}
+
+List<string> wildcards ...
+var files = from wc in wildcards
+			let dirName = Path.GetDirectoryName(wc)
+			let fileName = Path.GetFileName(wc)
+			from file in Directory.EnumerateFiles(
+				string.IsNullOrWhiteSpace(dirName) ? "." : dirName,
+				string.IsNullOrWhiteSpace(fileName) ? "*.*" : fileName,
+				recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+			select file;
+
+try
+{
+	// Traverse the specified files in parallel, and run each line through the Regex, collecting line number info
+	// for each match (the Zip call counts the lines in each file)
+	var matches = from file in files.AsParallel().AsOrdered().WithMergeOptions(ParallelMergeOptions.NotBuffered)
+				  from line in File.ReadLines(file)
+							   .Zip(Enumerable.Range(1, int.MaxValue), (s, i) => new { Num = i, Text = s, File = file })
+				  where regex.Value.IsMatch(line.Text)
+				  select line;
+	foreach (var line in matches)
+	{
+		Console.WriteLine($"{line.File}:{line.Num} {line.Text}");
+	}
+}
+catch (AggregateException ae)
+{
+	ae.Handle(e => { Console.WriteLine(e.Message); return true; });
+}
+
+
+
+ParallelQuery<TSource>
+	.WithMergeOptions
+	.WithCancellation
+	.WithDegreeOfParallelism // 并行化查询的处理器的最大数目
+
+
+
+// 在并行循环内重复操作的对象，必须要是thread-safe(线程安全)的。集合类的线程安全对象全部在System.Collections.Concurrent命名空间
+
+ 
+
+/// <summary>
+/// 具有线程局部变量的For循环
+/// </summary>
+private void Demo9()
+{
+    List<int> data = Program.Data;
+    long total = 0;
+    //这里定义返回值为long类型方便下面各个参数的解释
+    Parallel.For<long>(0,           // For循环的起点
+        data.Count,                 // For循环的终点
+        () => 0,                    // 初始化局部变量的方法(long)，既为下面的subtotal的初值
+        (i, LoopState, subtotal) => // 为每个迭代调用一次的委托，i是当前索引，LoopState是循环状态，subtotal为局部变量名
+        {
+            subtotal += data[i];    // 修改局部变量
+            return subtotal;        // 传递参数给下一个迭代
+        },
+        (finalResult) => Interlocked.Add(ref total, finalResult) //对每个线程结果执行的最后操作，这里是将所有的结果相加
+        );
+    Console.WriteLine(total);
+}
+/// <summary>
+/// 具有线程局部变量的ForEach循环
+/// </summary>
+private void Demo10()
+{
+    List<int> data = Program.Data;
+    long total = 0;
+    Parallel.ForEach<int, long>(data, // 要循环的集合对象
+        () => 0,                      // 初始化局部变量的方法(long)，既为下面的subtotal的初值
+        (i, LoopState, subtotal) =>   // 为每个迭代调用一次的委托，i是当前元素，LoopState是循环状态，subtotal为局部变量名
+        {
+            subtotal += i;            // 修改局部变量
+            return subtotal;          // 传递参数给下一个迭代
+        },
+        (finalResult) => Interlocked.Add(ref total, finalResult) //对每个线程结果执行的最后操作，这里是将所有的结果相加
+        );
+    Console.WriteLine(total);
+}
+```
+
+
 
 
 

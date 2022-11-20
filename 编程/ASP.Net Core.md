@@ -7,6 +7,30 @@ set ASPNETCORE_URLS=http://192l.168.1.102:8081
 dotnet Y.DP.Shen12.Server.dll
 ```
 
+### Route
+
+```c#
+[FromQuery]：从Url的查询字符串中获取值。查询字符串就是Url中问号（?）后面拼接的参数
+[FromRoute]：从路由数据中获取值。
+[FromForm]：从表单中获取值。
+[FromBody]：从请求正文中获取值。
+[FromHeader]：从请求标头中获取值。
+[FromServices]：从DI容器中获取服务。相比其他源，它特殊在值不是来源于HTTP请求，而是DI容器。
+
+
+public string[] Post([FromQuery] string[] ids)
+public string[] Post([FromForm] string[] ids)
+	ids=1&ids=2
+	ids[0]=1&ids[1]=2
+	[0]=1&[1]=2
+	ids[a]=1&ids[b]=2&ids.index=a&ids.index=b
+	[a]=1&[b]=2&index=a&index=b
+
+public Dictionary<int, string> Post([FromQuery] Dictionary<int, string> idNames)
+    idNames[1]=j&idNames[2]=k
+    [1]=j&[2]=k
+```
+
 
 
 ### Data Controller-View
