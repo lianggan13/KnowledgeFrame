@@ -396,9 +396,34 @@ Keys: Delay
 	Value="{Binding CleanWater, Delay=200}" />
 ```
 
+Keys:  Aysnc Binding
 
+```c#
+<TextBlock
+    Width="100"
+    HorizontalAlignment="Center"
+    Background="Honeydew"
+    Text="{Binding SlowestDP, IsAsync=True, FallbackValue='Loading...'}" />
+```
 
-Keys: DxBinding
+Keys: PriorityBinding
+
+```c#
+<TextBlock
+	Width="100"
+	HorizontalAlignment="Center"
+	Background="Honeydew">
+	<TextBlock.Text>
+		<PriorityBinding FallbackValue="Please wait...">
+			<Binding IsAsync="True" Path="SlowestDP" />
+			<Binding IsAsync="True" Path="SlowerDP" />
+			<Binding Path="FastDP" />
+		</PriorityBinding>
+	</TextBlock.Text>
+</TextBlock>
+```
+
+Keys: DXBinding
 
 ```xaml
 @s, @Self
@@ -515,6 +540,12 @@ Keys: DxEvent
 		IsEnabled="{DXBinding '(@a($ContextMenu).PlacementTarget.DataContext.Name !=`Default Program`) &amp;&amp; (@a($ContextMenu).PlacementTarget.DataContext.Name !=`Default Model`)'}" />
 </ContextMenu>
 ```
+
+
+
+### CollectionView
+
+
 
 
 
