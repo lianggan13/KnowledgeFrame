@@ -101,6 +101,15 @@ Keys: XmlnsDefinition
  xmlns:ctls="http://www.yd-tec.com/winfx/xaml/shared"
 ```
 
+Keys: x:static
+
+```c#
+DataContext="{x:Static common:AppMessages.Messages}"
+ItemsSource="{x:Static common:AppMessages.Messages}"
+```
+
+
+
 ### StringFormat
 
 ```
@@ -792,11 +801,17 @@ Keys：Command、CommandParameter、EventTrigger、CallMethodAction、InvokeComm
 ~~~xaml
 1.通过 事件 
 <Button Click="Button_Click"></Button>
+
 2.通过 命令
 <Button Command="{Binding Path=DataContext.OprateDataGridRow, RelativeSource={RelativeSource Mode=FindAncestor,AncestorType={x:Type UserControl}}}"
         CommandParameter="{Binding RelativeSource={x:Static RelativeSource.Self}}">
 </Button>	//  RelativeSource.Self     Button 自身作为参数
+
 3.通过 事件触发器 
+Microsoft.Expression.Interactions
+System.Windows.Interactivity
+(或者直接安装 NuGet 包: Expression.Blend.Sdk)
+
 xmlns:Interaction="http://schemas.microsoft.com/expression/2010/interactions"
 xmlns:Interactivity="http://schemas.microsoft.com/expression/2010/interactivity"
 <Button>
@@ -809,6 +824,39 @@ xmlns:Interactivity="http://schemas.microsoft.com/expression/2010/interactivity"
         </Interactivity:EventTrigger>
     </Interactivity:Interaction.Triggers>
 </Button>
+
+<TextBox
+	Width="300"
+	HorizontalAlignment="Center"
+	 Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+	<Interactivity:Interaction.Triggers>
+		<Interactivity:EventTrigger EventName="KeyUp">
+			<Interactivity:InvokeCommandAction Command="{Binding KeyUpCommand}" />
+		</Interactivity:EventTrigger>
+	</Interactivity:Interaction.Triggers>
+</TextBox>
+
+<TextBox
+         x:Name="txtValue"
+         Grid.Column="1"
+         VerticalContentAlignment="Center"
+         Template="{StaticResource SingleTextBox.Template}"
+         Text="{Binding Model.Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, NotifyOnValidationError=True}"
+         ToolTip="{Binding Model.ToolTip}"
+         Validation.Error="Value_ErrorEvent"
+         Validation.ErrorTemplate="{StaticResource advErrorTemplate}">
+    <Interactivity:Interaction.Triggers>
+        <Interactivity:EventTrigger EventName="PreviewTextInput">
+            <Interaction:CallMethodAction MethodName="PreviewTextInput" TargetObject="{Binding Model}" />
+        </Interactivity:EventTrigger>
+        <Interactivity:EventTrigger EventName="PreviewKeyDown">
+            <Interaction:CallMethodAction MethodName="SingleTextBox_PreviewKeyDown" TargetObject="{Binding Model}" />
+        </Interactivity:EventTrigger>
+        <Interactivity:EventTrigger EventName="Validation.Error">
+            <Interaction:CallMethodAction MethodName="Value_ErrorEvent" TargetObject="{Binding Model}" />
+        </Interactivity:EventTrigger>
+    </Interactivity:Interaction.Triggers>
+</TextBox>
 ~~~
 
 ​	
@@ -2170,7 +2218,7 @@ DashStyle:奇数位，宽度；偶数位，间距
 Data=”A 100,100 0 1 1 300,299 Z”
 A:		Arc 圆弧
 100,100:相当于 RadiusX,RadiusY，X轴半径，Y轴半径(当两者相同时，自然为⚪)
-0:		旋转角度；
+0:		旋转角度；(感觉没卵用)
 1:		1 取大圆弧，0 取小圆弧；(当图形设置了旋转角度，并且大于 180度时，才会生效)
 1:		1 顺时针画弧，0 逆时针画弧；(根据 起始坐标和终止坐标 两点画圆)；
 300,299:终止坐标
@@ -2819,6 +2867,19 @@ Stretch="UniformToFill"
 Viewbox="0,0,1.4,1" />
 ```
 
+Keys: BitmapImage --> Image
+
+```csharp
+Image myImage = new Image();
+BitmapImage bi = new BitmapImage();
+bi.BeginInit();
+bi.UriSource = new Uri("smiley.png", UriKind.Relative);
+bi.EndInit();
+myImage.Source = bi;
+```
+
+
+
 
 
 ### ItemsControl
@@ -3395,11 +3456,25 @@ Keys：CacheMode
 </Polyline>
 ~~~
 
+### Virtualization
 
+Keys: Data Virtualization
 
+```
+Data Virtualization 通常情况下我们说数据虚拟化是指数据源没有完全加载，仅加载当前需要显示的数据呈现给用户。这种场景会让我们想到数据分页显示，当需要特定页面的数据时，根据页数请求相应数据
 
+WPF没有提供对Data Virtualization原生态的支持，当时我们可以使用Paging相关技术来实现
+```
 
+Keys: UI Virtualization
 
+```
+针对数据容器渲染数据项的一个优化。举个例子，一个ListView/ListBox控件中有10000个Item，但是可见的只有10个，那么此时只渲染并显示这10个Item，剩余的9990个Item不实例化和显示。这样可以提高程序的性能
+
+WPF中 VirtualizingStackPanel容器是实现了UI Virtualization的容器，VirtualizingStackPanel也是ListBox/ListView的默认数据容器
+
+VirtualizingPanel.VirtualizationMode="Recycling"表示不循环实例化新的Item，例如Item1--Item20此时可见，拖动滚动条到Item100，再从Item100返回至Item1--Item20时，这时候Item1--Item20不会被重新实例化。默认情况下 VirtualizingPanel.VirtualizationMode="Standard"。在ListView进行滚动时，内存会用增加。
+```
 
 ### Experience
 
