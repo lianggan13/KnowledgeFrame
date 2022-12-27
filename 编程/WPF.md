@@ -554,7 +554,7 @@ Keys: DxEvent
 
 ### CollectionView
 
-
+![](Images\wpf_collectionview.jpg)
 
 
 
@@ -1844,8 +1844,6 @@ public class ValueValidationRule : ValidationRule
     </TextBox.Text>
 </TextBox>
 ```
-
-
 
 
 
@@ -3468,12 +3466,27 @@ WPF没有提供对Data Virtualization原生态的支持，当时我们可以使�
 
 Keys: UI Virtualization
 
-```
-针对数据容器渲染数据项的一个优化。举个例子，一个ListView/ListBox控件中有10000个Item，但是可见的只有10个，那么此时只渲染并显示这10个Item，剩余的9990个Item不实例化和显示。这样可以提高程序的性能
+```c#
+启用虚拟化特性
+VirtualizingPanel.IsVirtualizing="True"
 
-WPF中 VirtualizingStackPanel容器是实现了UI Virtualization的容器，VirtualizingStackPanel也是ListBox/ListView的默认数据容器
+启用数据分组虚拟化特性
+VirtualizingPanel.IsVirtualizingWhenGrouping="True"
 
-VirtualizingPanel.VirtualizationMode="Recycling"表示不循环实例化新的Item，例如Item1--Item20此时可见，拖动滚动条到Item100，再从Item100返回至Item1--Item20时，这时候Item1--Item20不会被重新实例化。默认情况下 VirtualizingPanel.VirtualizationMode="Standard"。在ListView进行滚动时，内存会用增加。
+设置容器项再循环
+VirtualizingPanel.VirtualizationMode="Recycling"
+VirtualizingPanel.VirtualizationMode="Standard" // 在ListView进行滚动时，内存会增加。
+
+缓存超过可视范围的附加项的数量. (在开始滚动时，可立即显示这些项)
+VirtualizingPanel.CacheLength="100,500" // 在可视范围之前缓存100项，在可视范围之后缓存500项
+缓存单位 
+VirtualizingPanel.CacheLengthUnit="Item"
+
+设置延迟滚动 (当用户在滚动条上拖动滚动滑块时不会更新列表显示，只有用户释放滚定滑块时才刷新)
+ScrollViewer.IsDeferredScrollingEnabled="True"
+
+设置滚动像素单元 (VirtualizingStackPanel通常使用基于项的滚动，这意味着当向下滚动少许时，下一项就显示出来。无法滚动查看项的一部分，在面板上至少会滚动一个完整项。可以通过属性覆盖该行为)
+VirtualizingPanel.ScrollUnit="Pixel"
 ```
 
 ### Experience

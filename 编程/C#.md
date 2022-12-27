@@ -278,9 +278,91 @@ SignalR 是什么？
 用于快速构建需要实时进行用户交互和数据更新的 Web 应用，如 股票、天气、硬件设备信息更新
 ```
 
+### Preofession C#
+
+Keys: 异步编程
+```c#
+1.BeginXXX/EndXXX
+2.EAP
+3.TAP (async/await Task)
+
+await 关键字会解除调用线程(如 UI线程)的阻塞，完成其他任务，当异步方法完成其后台处理后，调用线程(UI线程)继续执行，并从后台任务中获得结果
+
+ConfigureAwait(bool) 异步方法完成后，是否切换到同步上下文(若 await 后的代码没有用到任何 UI 元素，避免切换到同步上下文会执行得更快)
+WPF、WinForm、UWP、异步完成并放回时，默认切换得到 UI 线程
 
 
-#### 面试
+多个异步方法互不依赖，且返回类型相同吗，可考虑使用组合器
+	Task<string> t1 = GreetingAsync("Stephanie");
+	Task<string> t2 = GreetingAsync("Matthias");
+	string[] result = await Task.WhenAll(t1, t2);
+
+
+
+ValueTask,缓存异步结果,避免创建 Task 开销
+	private readonly static Dictionary<string, string> names = new Dictionary<string, string>();
+
+	static async ValueTask<string> GreetingValueTaskAsync(string name)
+	{
+		if (names.TryGetValue(name, out string result))
+		{
+			return result;
+		}
+		else
+		{
+			result = await GreetingAsync(name);
+			names.Add(name, result);
+			return result;                
+		}
+	}
+
+	static ValueTask<string> GreetingValueTask2Async(string name)
+	{
+		if (names.TryGetValue(name, out string result))
+		{
+			return new ValueTask<string>(result);
+		}
+		else
+		{
+			Task<string> t1 =  GreetingAsync(name);
+			
+			TaskAwaiter<string> awaiter = t1.GetAwaiter();
+			awaiter.OnCompleted(OnCompletion);
+			return new ValueTask<string>(t1);
+
+			void OnCompletion()
+			{
+				names.Add(name, awaiter.GetResult());
+			}
+		}
+	}
+
+显示所有异步任务的异常
+private static async void ShowAggregatedException()
+{
+	Task taskResult = null;
+	try
+	{
+		Task t1 = ThrowAfter(2000, "first");
+		Task t2 = ThrowAfter(1000, "second");
+		await (taskResult = Task.WhenAll(t1, t2));
+	}
+	catch (Exception ex)
+	{
+		// just display the exception information of the first task that is awaited within WhenAll
+		Console.WriteLine($"handled {ex.Message}");
+		foreach (var ex1 in taskResult.Exception.InnerExceptions)
+		{
+			Console.WriteLine($"inner exception {ex1.Message} from task {ex1.Source}");
+		}
+	}
+}
+
+```
+
+
+
+### 面试
 
 关键点：专业能力(技术、处理问题)、语言表达能力(逻辑、论点，论据、论证，推论)
 
