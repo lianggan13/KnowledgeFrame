@@ -71,6 +71,28 @@ var offset = ((Vector)pi.GetValue(sender)).X;
 4. [**ConcurrentBag**](https://dotnettutorials.net/lesson/concurrentbag-collection-class-in-csharp/): Thread-safe implementation of an unordered collection.
 5. [**BlockingCollection**](https://dotnettutorials.net/lesson/blockingcollection-class-in-csharp/): Provides a Classical Producer-Consumer pattern.
 
+```
+C# .Net 线程同步的各种技术，及其应用场景
+互斥锁: 仅允许一个线程使用
+	lock
+	Monitor lock 由C#编译器解析为 Monitor 类
+	SpinLock 适合量大、短时间锁定
+	Mutex 支持跨进程
+
+信号量：支持同时多个线程使用、可控线程数量
+	Semaphore
+	SemaphoreSlim 短时间、轻量级
+
+事件: 等待信号的线程保持阻塞状态
+	ManualResetEvent
+	ManualResetEventSlim
+	CountdownEvent	多线程执行，合并结果
+	AutoResetEvent
+	
+	Barrier 允许多个线程，在同一个时刻汇总
+	
+```
+
 
 
 #### Parallel

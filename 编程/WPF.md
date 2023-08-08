@@ -557,109 +557,13 @@ Keys: DxEvent
 ![](Images\wpf_collectionview.jpg)
 
 
-
-### Convert
-
-Keys: IValueConverter、Convert、ConvertBack
-
-```cs
-//当值从绑定源传播给绑定目标时，调用方法Convert
-
-//当值从绑定目标传播给绑定源时，调用此方法ConvertBack
-```
-
-Keys: TypeConverter
-
-```c#
-[TypeConverter(typeof(LengthConverter))]
-public double Width { get; set; }
-[TypeConverter(typeof(LengthConverter))]
-public double Height { get; set; }
-```
-
-### Markup Extension
+### MarkupExtension
 
 Keys: x:Null
 
 ```xaml
 <Button Background="{x:Null}">Click</Button>
 ```
-
-```c#
-Button b = new Button();
-b.Background = null;
-b.Content = "Click";
-```
-
-Keys: x:Array
-
-```xaml
-<Grid>
-  <Grid.Resources>
-    <x:ArrayExtension Type="{x:Type Brush}" x:Key="brushes">
-      <SolidColorBrush Color="Blue" />
-      <LinearGradientBrush StartPoint="0,0" EndPoint="0.8,1.5">
-        <LinearGradientBrush.GradientStops>
-          <GradientStop Color="Green" Offset="0" />
-          <GradientStop Color="Cyan" Offset="1" />
-        </LinearGradientBrush.GradientStops>
-      </LinearGradientBrush>
-      <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-        <LinearGradientBrush.GradientStops>
-          <GradientStop Color="Black" Offset="0" />
-          <GradientStop Color="Red" Offset="1" />
-        </LinearGradientBrush.GradientStops>
-      </LinearGradientBrush>
-    </x:ArrayExtension>
-  </Grid.Resources>
-
-  <ListBox ItemsSource="{StaticResource brushes}" Name="myListBox">
-    <ListBox.ItemTemplate>
-      <DataTemplate>
-        <Rectangle Fill="{Binding}" Width="100" Height="40" Margin="2" />
-      </DataTemplate>
-    </ListBox.ItemTemplate>
-  </ListBox>
-</Grid>
-```
-
-```c#
-Brush[] brushes = new Brush[3];
-SolidColorBrush scb = new new SolidColorBrush();
-scb.Color = Colors.Blue;
-brushes[0] = scb;
-
-LinearGradientBrush lgb = new LinearGradientBrush();
-lgb.StartPoint = new Point(0,0);
-lgb.EndPoint = new Point(0.8, 1.5);
-GradientStop gs = new GradientStop();
-gs.Offset = 0;
-gs.Color = Colors.Green;
-lgb.GradientStops.Add(gs);
-gs = new GradientStop();
-gs.Offset = 1;
-gs.Color = Colors.Cyan;
-lgb.GradientStops.Add(gs);
-brushes[1] = lgb;
-
-lgb = new LinearGradientBrush();
-lgb.StartPoint = new Point(0,0);
-lgb.EndPoint = new Point(0, 1);
-gs = new GradientStop();
-gs.Offset = 0;
-gs.Color = Colors.Black;
-lgb.GradientStops.Add(gs);
-gs = new GradientStop();
-gs.Offset = 1;
-gs.Color = Colors.Red;
-lgb.GradientStops.Add(gs);
-brushes[2] = lgb;
-
-myGrid.Resources["brushes"] = brushes;
-...
-myListBox.ItemsSource = myListBox.Resources["brushes"];
-```
-
 Keys: x:Static
 
 ```xaml
@@ -767,6 +671,26 @@ public class FontUriExtension : MarkupExtension
     }
 }
 ```
+### TypeConverter
+
+```c#
+[TypeConverter(typeof(LengthConverter))]
+public double Width { get; set; }
+[TypeConverter(typeof(LengthConverter))]
+public double Height { get; set; }
+```
+
+### ValueConverter
+
+Keys: IValueConverter、Convert、ConvertBack
+
+```cs
+//当值从绑定源传播给绑定目标时，调用方法Convert
+
+//当值从绑定目标传播给绑定源时，调用此方法ConvertBack
+```
+
+
 
 
 ### Behavior
@@ -810,7 +734,7 @@ Keys：Command、CommandParameter、EventTrigger、CallMethodAction、InvokeComm
 3.通过 事件触发器 
 Microsoft.Expression.Interactions
 System.Windows.Interactivity
-(或者直接安装 NuGet 包: Expression.Blend.Sdk)
+(或者直接安装 NuGet 包: Microsoft.Expression.Blend.SDK.WPF)
 
 xmlns:Interaction="http://schemas.microsoft.com/expression/2010/interactions"
 xmlns:Interactivity="http://schemas.microsoft.com/expression/2010/interactivity"
@@ -3727,9 +3651,81 @@ VirtualizingPanel.ScrollUnit="Pixel"
 > 
 > 
 
+## Prism
+
+### Region
+
+```xaml
+两种定义 Region 的方式：
+
+RegionManager.RegionName（XAML）
+RegionManager.SetRegionName（Code）
+1.<ContentControl Grid.Row="0" prism:RegionManager.RegionName="HeaderRegion" />
+2.RegionManager.SetRegionName(Header, "HeaderRegion");
+
+两种定义 View 与 Region 的映射关系
+1.regionManager.RegisterViewWithRegion("HeaderRegion", typeof(HeaderView));
+2.HeaderView headerView = container.Resolve<HeaderView>();
+  regionManager.Regions["HeaderRegion"].Add(headerView);
+```
+
+View对象注册为单例对象
+protected override void RegisterTypes(IContainerRegistry containerRegistry)
+{
+	containerRegistry.RegisterSingleton<HeaderView>();
+	containerRegistry.RegisterSingleton<MenuView>();
+	containerRegistry.RegisterSingleton<ContentView>();
+}
 
 
-## Blend 设计 WPF 
+
+```c#
+RegionContext
+<ContentControl prism:RegionManager.RegionContext="{Binding SelectedItem, ElementName=_listOfPeople}"/>
+	
+RegionContext.GetObservableContext(this).PropertyChanged += PersonDetail_PropertyChanged;
+
+private void PersonDetail_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+{
+	var context = (ObservableObject<object>)sender;
+	var selectedPerson = (Person)context.Value;
+	(DataContext as PersonDetailViewModel).SelectedPerson = selectedPerson;
+}
+```
+
+### Event
+
+```c#
+PubSubEvent
+	.Publish
+	.Subscribe
+```
+
+### Navigation
+```c#
+public void RegisterTypes(IContainerRegistry containerRegistry)
+{
+    containerRegistry.RegisterForNavigation<ViewA>();
+    containerRegistry.RegisterForNavigation<ViewB>();
+}
+_regionManager.RequestNavigate("ContentRegion", navigatePath);
+	
+INavigationAware
+	.OnNavigatedTo
+	.IsNavigationTarget
+	.OnNavigatedFrom
+IConfirmNavigationRequest
+	.ConfirmNavigationRequest
+IRegionMemberLifetime
+	.KeepAlive
+NavigationContext
+```
+
+### Dialog
+​	IDialogAware
+​	IDialogService
+
+## Blend
 
 让一控件置于另一控件的 ControlTemplate:	点击 Gird --> 工具 --> 构成控件
 添加触发器和动画
@@ -3747,60 +3743,7 @@ VirtualizingPanel.ScrollUnit="Pixel"
 
 变换：沿 x 轴正方向缩放，  RenderTransformOrigin="0,0.5" ---> ScaleTransform ScaleX="1.15"
 
-## Study
+## Github
 
-周三四J   WPF框架开发中的解耦思想与开发运用
-链接：https://pan.baidu.com/s/1Ujr5y_0HKCc4SbZopFdFkw 
-提取码：v0qp
-WPF解耦模式下的核心绑定对象解读
-链接：https://pan.baidu.com/s/1dYnUTUpdKwM3gPulVO83UQ 
-提取码：b8ph
-
-这是本周wpf上位机的课程资料哦，我之前发你的那些都学完没有呀？
-
-周三四晚J   PLC工程师快速上手上位机应用开发必备
-链接：https://pan.baidu.com/s/1SJlEescLHvhw7zWykHXjsQ 
-提取码：rdhd
-
-基于C#的上位机应用动态报警的处理逻辑
-链接：https://pan.baidu.com/s/1XEUFYPMYHWrSG1mKQ4ZE9g 
-提取码：kupx
-···············································································
-这是本周wpf上位机公开课资料哈，请查收
-
-哈喽，本周资料又出来咯，，一定要抽空学习下！
-
-周三四晚J   WPF界面开发中的个性化对象（组件）处理方法与过程【课程源码+视频】
-链接：https://pan.baidu.com/s/1cVDF5AL8bkn68xm4EOeCfQ 
-提取码：b7li
-
-WPF开发个性化界面需求中的平面图形对象【课程源码】【无视频】
-链接：https://pan.baidu.com/s/1GUUWWwaDjx4BObgDvbtnng 
-提取码：z8nm
-
-周三晚J   基于IOC思想的MVVM模式模块间数据交换逻辑【课程源码+视频】
-链接：https://pan.baidu.com/s/1xSyinaz-w3H9KGoI9zh76A 
-提取码：8fn6
-
-这是本周三晚上公开课资料哦，需要最新 WPF进阶+工业互联 完整技术线路图，可以找我拿哈
-
-周三四晚J   WPF数据绑定下的通信功能交互【课程源码+视频】
-链接：https://pan.baidu.com/s/1_cT80Qm7DHhw2c3-lqYH0g 
-提取码：aq35
-
-WPF中个性化交互功能的实现思路与流程【课程源码+视频】
-链接：https://pan.baidu.com/s/1QP2dbtZGSoAQnUK3mQfxbQ 
-提取码：k19f
-
-以上是本周WPF上位机体验课资料哈，周末抽空充实充实自己  
-另外，咱们上位机课表升级，增加Xamarin框架内容，晚点会更新出来，你要抢先看看有哪些知识点么？
-
-周三四晚J   基于C#的S7协议读写报文解析【课程源码+视频】
-链接：https://pan.baidu.com/s/1y5lnKGyl0GlMKglJBbsUbw 
-提取码：hnbz
-
-数据远程交互中的WebSocket与MQTT应用【课程源码+视频】
-链接：https://pan.baidu.com/s/1kayp-QSu8zvjYhOcQyMJ9Q 
-提取码：obn6
-
- 
+ScreenToGif
+SharpVectors
